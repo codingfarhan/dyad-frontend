@@ -5,6 +5,7 @@ import ButtonComponent from "@/components/reusable/ButtonComponent";
 import { BigIntInput } from "@/components/reusable/BigIntInput";
 import { useTransactionStore } from "@/lib/store";
 import {
+  useReadDyadBalanceOf,
   useReadDyadMintedDyad,
   useReadVaultManagerGetTotalValue,
   useReadVaultManagerMinCollatRatio,
@@ -27,10 +28,20 @@ const Mint: React.FC<MintProps> = ({ dyadMinted, currentCr, tokenId }) => {
   const [burnInputValue, setBurnInputValue] = useState("");
   const { setTransactionData } = useTransactionStore();
 
+  const { address } = useAccount();
+
   const { data: mintedDyad } = useReadDyadMintedDyad({
     args: [BigInt(tokenId)],
     chainId: defaultChain.id,
   });
+
+  const { data: dyadBalance } = useReadDyadBalanceOf({
+    args: [address!],
+    chainId: defaultChain.id,
+    query: {
+      enabled: !!address,
+    }
+  })
 
   const { data: collateralValue } = useReadVaultManagerGetTotalValue({
     args: [BigInt(tokenId)],
@@ -50,7 +61,6 @@ const Mint: React.FC<MintProps> = ({ dyadMinted, currentCr, tokenId }) => {
           (BigInt(mintInputValue) || 0n) -
           (BigInt(burnInputValue) || 0n))
       : 0n;
-  const { address } = useAccount();
 
   const onMaxMintHandler = () => {
     setMintInputValue(
@@ -66,7 +76,10 @@ const Mint: React.FC<MintProps> = ({ dyadMinted, currentCr, tokenId }) => {
   };
 
   const onMaxBurnHandler = () => {
-    setBurnInputValue(mintedDyad?.toString() || "0");
+    const minted = mintedDyad || 0n;
+    const balance = dyadBalance || 0n;
+    const min = minted < balance ? minted : balance;
+    setBurnInputValue(min.toString());
   };
 
   if (collateralValue === 0n && !collateralValue) {
