@@ -6,6 +6,7 @@ import { NumericFormat } from 'react-number-format'
 import { Input, InputProps } from '@/components/ui/input'
 
 import { cn, fromBigNumber, toBigNumber } from '@/lib/utils'
+import { formatUnits } from 'viem'
 
 interface BigIntInputProps
   extends Omit<InputProps, 'value' | 'onChange' | 'max' | 'defaultValue'> {
@@ -30,8 +31,8 @@ export const BigIntInput = forwardRef<HTMLInputElement, BigIntInputProps>(
         type="text"
         inputMode="decimal"
         value={
-          value && Number(value) !== 0 && value !== ''
-            ? fromBigNumber(BigInt(value), decimals)
+          value && BigInt(value) !== 0n && value !== ''
+            ? formatUnits(BigInt(value), decimals)
             : ''
         }
         onValueChange={(data) => {
