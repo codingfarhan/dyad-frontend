@@ -5,7 +5,6 @@ import ButtonComponent from "@/components/reusable/ButtonComponent";
 import { BigIntInput } from "@/components/reusable/BigIntInput";
 import { useTransactionStore } from "@/lib/store";
 import {
-  useReadDyad,
   useReadDyadBalanceOf,
   useReadDyadMintedDyad,
   useReadVaultManagerGetTotalValue,
