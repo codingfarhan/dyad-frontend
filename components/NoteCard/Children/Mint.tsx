@@ -76,10 +76,10 @@ const Mint: React.FC<MintProps> = ({ dyadMinted, currentCr, tokenId }) => {
   };
 
   const onMaxBurnHandler = () => {
-    const minted = fromBigNumber(mintedDyad);
-    const balance = fromBigNumber(dyadBalance);
-    const min = Math.min(minted, balance);
-    setBurnInputValue(toBigNumber(min).toString());
+    const minted = mintedDyad || 0n;
+    const balance = dyadBalance || 0n;
+    const min = minted < balance ? minted : balance;
+    setBurnInputValue(min.toString());
   };
 
   if (collateralValue === 0n && !collateralValue) {
