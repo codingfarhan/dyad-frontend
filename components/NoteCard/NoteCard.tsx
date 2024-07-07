@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import NoteCardsContainer from "../reusable/NoteCardsContainer";
 import TabsComponent from "../reusable/TabsComponent";
 import {
@@ -79,7 +79,10 @@ function NoteCard({tokenId}: {tokenId: string}) {
       : `${formatNumber(fromBigNumber(collatRatio, 16))}%`;
   const totalDyad = `${fromBigNumber(mintedDyad)}`;
 
-  const maxDyad = (collateralValue || 0n) / (minCollateralizationRatio || 1n);
+  const mintableDyad = useMemo(() => {
+    const maxDyad = (collateralValue || 0n) * 1000000000000000000n / (minCollateralizationRatio || 1n);
+    return maxDyad - (mintedDyad || 0n);
+  }, [collateralValue, minCollateralizationRatio, mintedDyad]);
 
   const noteData: NoteNumberDataColumnModel[] = [
     {
@@ -107,7 +110,7 @@ function NoteCard({tokenId}: {tokenId: string}) {
         <NoteNumber
           data={noteData}
           dyad={[
-            fromBigNumber(maxDyad - BigInt(mintedDyad || 0)),
+            fromBigNumber(mintableDyad),
             fromBigNumber(mintedDyad),
           ]}
           collateral={vaultUsd as any}
