@@ -18,6 +18,7 @@ const NoteTable: React.FC<any> = ({}) => {
           id
           collatRatio
           kerosene
+          dyad
         }
       }
     }
@@ -29,6 +30,7 @@ const NoteTable: React.FC<any> = ({}) => {
       ...item,
       collatRatio: (parseFloat(item.collatRatio) / 1e16).toFixed(2) + "%",
       kerosene: (parseFloat(item.kerosene) / 1e18).toFixed(0),
+      dyad: (parseFloat(item.dyad) / 1e18).toFixed(0),
     }));
   }
 
@@ -52,6 +54,10 @@ const NoteTable: React.FC<any> = ({}) => {
               {
                 key: "kerosene",
                 label: "KERO",
+              },
+              {
+                key: "dyad",
+                label: "DYAD",
               },
             ]}
             rows={parsedData}

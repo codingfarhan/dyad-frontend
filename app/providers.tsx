@@ -35,6 +35,7 @@ const client = new Client({
 
 const apolloClient = new ApolloClient({
   uri: "https://dyad-indexer-v2-production.up.railway.app/",
+  // uri: "http://localhost:42069",
   cache: new InMemoryCache(),
 });
 
