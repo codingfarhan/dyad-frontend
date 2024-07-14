@@ -21,6 +21,7 @@ import { SnapshotClaim } from "@/components/NoteCard/Children/SnapshotClaim";
 import useIDsByOwner from "@/hooks/useIDsByOwner";
 import dynamic from "next/dynamic";
 import { useQuery, gql } from "@apollo/client";
+import NoteTable from "@/components/note-table";
 
 const TabsComponent = dynamic(
   () => import("@/components/reusable/TabsComponent"),
@@ -35,21 +36,6 @@ export default function Home() {
     args: [address],
     chainId: defaultChain.id,
   });
-
-  const GET_ITEMS = gql`
-    query {
-      notes {
-        items {
-          id
-          collatRatio
-          kerosene
-        }
-      }
-    }
-  `;
-
-  const { loading, error, data } = useQuery(GET_ITEMS);
-  console.log("XXXXX", data);
 
   const { tokens } = useIDsByOwner(address, balance);
 
@@ -130,6 +116,7 @@ export default function Home() {
   return (
     <div className="flex-1 max-w-screen-md w-[745px] p-4 mt-4">
       <TabsComponent tabsData={tabsData} urlUpdate />
+      <NoteTable />
     </div>
   );
 }
