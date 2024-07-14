@@ -111,12 +111,16 @@ export default function Home() {
       tabKey: "airdrop",
       content: <SnapshotClaim />,
     },
+    {
+      label: "Notes Ranking",
+      tabKey: "notes-ranking",
+      content: <NoteTable />,
+    },
   ];
 
   return (
     <div className="flex-1 max-w-screen-md w-[745px] p-4 mt-4">
       <TabsComponent tabsData={tabsData} urlUpdate />
-      <NoteTable />
     </div>
   );
 }

@@ -38,7 +38,7 @@ const NoteTable: React.FC<any> = ({}) => {
   return (
     <div>
       {!loading && !error && (
-        <div className="h-[150px]">
+        <div className="h-[500px]">
           <TableComponent
             columns={[
               {
