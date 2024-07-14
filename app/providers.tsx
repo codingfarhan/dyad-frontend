@@ -1,19 +1,20 @@
 "use client";
 
-import {ThemeProvider} from "@/components/theme-provider";
+import { ThemeProvider } from "@/components/theme-provider";
 import {
   Client,
   Provider as UrqlProvider,
   cacheExchange,
   fetchExchange,
 } from "urql";
-import {NextUIProvider} from "@nextui-org/react";
-import {ReactNode} from "react";
-import {State, WagmiProvider} from "wagmi";
-import {projectId, wagmiConfig} from "@/lib/config";
-import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
-import {createWeb3Modal} from "@web3modal/wagmi";
-import {ModalProvider} from "@/contexts/modal";
+import { NextUIProvider } from "@nextui-org/react";
+import { ReactNode } from "react";
+import { WagmiProvider } from "wagmi";
+import { projectId, wagmiConfig } from "@/lib/config";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { createWeb3Modal } from "@web3modal/wagmi";
+import { ModalProvider } from "@/contexts/modal";
+import { ApolloProvider, InMemoryCache, ApolloClient } from "@apollo/client";
 
 const queryClient = new QueryClient();
 
@@ -32,21 +33,24 @@ const client = new Client({
   exchanges: [cacheExchange, fetchExchange],
 });
 
-export const Providers = ({
-  children,
-}: {
-  children: ReactNode;
-}) => {
+const apolloClient = new ApolloClient({
+  uri: "https://dyad-indexer-v2-production.up.railway.app/",
+  cache: new InMemoryCache(),
+});
+
+export const Providers = ({ children }: { children: ReactNode }) => {
   return (
     <NextUIProvider>
       <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-        <WagmiProvider config={wagmiConfig}>
-          <QueryClientProvider client={queryClient}>
-            <UrqlProvider value={client}>
-              <ModalProvider>{children}</ModalProvider>
-            </UrqlProvider>
-          </QueryClientProvider>
-        </WagmiProvider>
+        <ApolloProvider client={apolloClient}>
+          <WagmiProvider config={wagmiConfig}>
+            <QueryClientProvider client={queryClient}>
+              <UrqlProvider value={client}>
+                <ModalProvider>{children}</ModalProvider>
+              </UrqlProvider>
+            </QueryClientProvider>
+          </WagmiProvider>
+        </ApolloProvider>
       </ThemeProvider>
     </NextUIProvider>
   );
