@@ -32,7 +32,7 @@ const NoteTable: React.FC<any> = ({}) => {
       ...item,
       collatRatio: (parseFloat(item.collatRatio) / 1e16).toFixed(2) + "%",
       kerosene: (parseFloat(item.kerosene) / 1e18).toFixed(0),
-      dyad: (parseFloat(item.dyad) / 1e18).toFixed(0),
+      dyad: "$" + (parseFloat(item.dyad) / 1e18).toFixed(0),
       xp: (parseFloat(item.xp) / 1e18).toFixed(0),
     }));
   }
@@ -51,8 +51,8 @@ const NoteTable: React.FC<any> = ({}) => {
                 label: "Note",
               },
               {
-                key: "collatRatio",
-                label: "CR",
+                key: "xp",
+                label: "XP",
               },
               {
                 key: "kerosene",
@@ -63,8 +63,8 @@ const NoteTable: React.FC<any> = ({}) => {
                 label: "DYAD",
               },
               {
-                key: "xp",
-                label: "XP",
+                key: "collatRatio",
+                label: "CR",
               },
             ]}
             rows={parsedData}
