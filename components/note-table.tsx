@@ -19,11 +19,13 @@ const NoteTable: React.FC<any> = ({}) => {
           collatRatio
           kerosene
           dyad
+          xp
         }
       }
     }
   `;
   const { loading, error, data } = useQuery(GET_ITEMS);
+  console.log("XXX", data);
 
   function parseRows(items) {
     return items.map((item) => ({
@@ -31,6 +33,7 @@ const NoteTable: React.FC<any> = ({}) => {
       collatRatio: (parseFloat(item.collatRatio) / 1e16).toFixed(2) + "%",
       kerosene: (parseFloat(item.kerosene) / 1e18).toFixed(0),
       dyad: (parseFloat(item.dyad) / 1e18).toFixed(0),
+      xp: (parseFloat(item.xp) / 1e18).toFixed(0),
     }));
   }
 
@@ -58,6 +61,10 @@ const NoteTable: React.FC<any> = ({}) => {
               {
                 key: "dyad",
                 label: "DYAD",
+              },
+              {
+                key: "xp",
+                label: "XP",
               },
             ]}
             rows={parsedData}
