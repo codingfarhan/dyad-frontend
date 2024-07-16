@@ -28,13 +28,15 @@ const NoteTable: React.FC<any> = ({}) => {
   console.log("XXX", data);
 
   function parseRows(items) {
-    return items.map((item) => ({
-      ...item,
-      collatRatio: (parseFloat(item.collatRatio) / 1e16).toFixed(2) + "%",
-      kerosene: (parseFloat(item.kerosene) / 1e18).toFixed(0),
-      dyad: "$" + (parseFloat(item.dyad) / 1e18).toFixed(0),
-      xp: (parseFloat(item.xp) / 1e18).toFixed(0),
-    }));
+    return items
+      .map((item) => ({
+        ...item,
+        collatRatio: (parseFloat(item.collatRatio) / 1e16).toFixed(2) + "%",
+        kerosene: (parseFloat(item.kerosene) / 1e18).toFixed(0),
+        dyad: "$" + (parseFloat(item.dyad) / 1e18).toFixed(0),
+        xp: (parseFloat(item.xp) / 1e18).toFixed(0),
+      }))
+      .sort((a, b) => parseFloat(b.xp) - parseFloat(a.xp));
   }
 
   const parsedData =
