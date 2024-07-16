@@ -13,7 +13,7 @@ const NoteTable: React.FC<any> = ({}) => {
 
   const GET_ITEMS = gql`
     query {
-      notes(limit=1000) {
+      notes(limit: 1000) {
         items {
           id
           collatRatio
