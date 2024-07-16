@@ -13,6 +13,15 @@ export function formatUSD(amount, removeDollarSign = false) {
   return amount.slice(0, -3);
 }
 
+export function formatCurrency(amount) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
 export function round(value, decimals) {
   return Math.round(parseFloat(value) * 10 ** decimals) / 10 ** decimals;
 }

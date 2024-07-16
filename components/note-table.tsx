@@ -2,6 +2,7 @@ import TableComponent from "@/components/reusable/TableComponent";
 import useModal from "@/contexts/modal";
 import React from "react";
 import { useQuery, gql } from "@apollo/client";
+import { formatCurrency } from "@/utils/currency";
 
 const NoteTable: React.FC<any> = ({}) => {
   const { pushModal } = useModal();
@@ -31,9 +32,11 @@ const NoteTable: React.FC<any> = ({}) => {
     return items
       .map((item) => ({
         ...item,
-        collatRatio: (parseFloat(item.collatRatio) / 1e16).toFixed(2) + "%",
-        kerosene: (parseFloat(item.kerosene) / 1e18).toFixed(0),
-        dyad: "$" + (parseFloat(item.dyad) / 1e18).toFixed(0),
+        collatRatio: (parseFloat(item.collatRatio) / 1e16).toFixed(0) + "%",
+        kerosene: formatCurrency(
+          (parseFloat(item.kerosene) / 1e18).toFixed(0)
+        ).slice(1),
+        dyad: formatCurrency((parseFloat(item.dyad) / 1e18).toFixed(0)),
         xp: (parseFloat(item.xp) / 1e18).toFixed(0),
       }))
       .sort((a, b) => parseFloat(b.xp) - parseFloat(a.xp));
