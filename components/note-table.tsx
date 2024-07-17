@@ -1,21 +1,12 @@
 import TableComponent from "@/components/reusable/TableComponent";
-import useModal from "@/contexts/modal";
-import React, { useState } from "react";
+import React from "react";
 import { useQuery, gql } from "@apollo/client";
 import { formatCurrency } from "@/utils/currency";
 import Loader from "./loader";
 import { useReadXpTotalSupply } from "@/generated";
 
 const NoteTable: React.FC<any> = ({}) => {
-  const { pushModal } = useModal();
-
-  // const onRowClickHandler = (key: string) => {
-  //   pushModal(<LpStakeModal tabsData={getLpModalData(key)} logo={key} />);
-  //   console.log(key);
-  // };
-  //
   const { data: totalSupply } = useReadXpTotalSupply();
-  console.log("totalSupply", totalSupply);
 
   const GET_ITEMS = gql`
     query {
