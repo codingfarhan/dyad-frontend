@@ -1,9 +1,10 @@
 import TableComponent from "@/components/reusable/TableComponent";
 import useModal from "@/contexts/modal";
-import React from "react";
+import React, { useState } from "react";
 import { useQuery, gql } from "@apollo/client";
 import { formatCurrency } from "@/utils/currency";
 import Loader from "./loader";
+import { useReadXpTotalSupply } from "@/generated";
 
 const NoteTable: React.FC<any> = ({}) => {
   const { pushModal } = useModal();
@@ -12,6 +13,9 @@ const NoteTable: React.FC<any> = ({}) => {
   //   pushModal(<LpStakeModal tabsData={getLpModalData(key)} logo={key} />);
   //   console.log(key);
   // };
+  //
+  const { data: totalSupply } = useReadXpTotalSupply();
+  console.log("totalSupply", totalSupply);
 
   const GET_ITEMS = gql`
     query {
@@ -39,6 +43,12 @@ const NoteTable: React.FC<any> = ({}) => {
         ).slice(1),
         dyad: formatCurrency((parseFloat(item.dyad) / 1e18).toFixed(0)),
         xp: (parseFloat(item.xp) / 1e18 / 1e6).toFixed(0) + "M",
+        xpPercentage: totalSupply
+          ? (
+              (parseFloat(item.xp) / 1e18 / (parseFloat(totalSupply) / 1e18)) *
+              100
+            ).toFixed(2) + "%"
+          : "N/A",
       }))
       .sort((a, b) => parseFloat(b.xp) - parseFloat(a.xp))
       .map((item, index) => ({
@@ -68,6 +78,10 @@ const NoteTable: React.FC<any> = ({}) => {
               {
                 key: "xp",
                 label: "XP",
+              },
+              {
+                key: "xpPercentage",
+                label: "% of XP",
               },
               {
                 key: "kerosene",

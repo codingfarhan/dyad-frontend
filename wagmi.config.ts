@@ -18,7 +18,7 @@ export default defineConfig({
     {
       name: "KeroseneDnftClaim",
       address: {
-        [mainnet.id]: "0xa15Abaec47F56afC05027AD839c46703AC3a8DC9"
+        [mainnet.id]: "0xa15Abaec47F56afC05027AD839c46703AC3a8DC9",
       },
       abi: keroseneDnftClaimAbi,
     },
@@ -176,6 +176,14 @@ export default defineConfig({
       address: {
         [mainnet.id]: "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0",
         [anvil.id]: "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0",
+      },
+      abi: erc20Abi,
+    },
+    {
+      name: "XP",
+      address: {
+        [mainnet.id]: "0xeF443646E52d1C28bd757F570D18F4Db30dB70F4",
+        [anvil.id]: "0xeF443646E52d1C28bd757F570D18F4Db30dB70F4",
       },
       abi: erc20Abi,
     },
