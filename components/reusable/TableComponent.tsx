@@ -30,11 +30,11 @@ const TableComponent: React.FC<TableComponentProps> = ({
         shadow="none"
         classNames={{
           th: " table-header ",
-          tbody: "px-0 h-full ",
+          tbody: "px-2 h-full ",
           tr: `${onRowClick ? "cursor-pointer hover:text-[#a1a1aa]" : ""} ${
             size === "compact" ? "h-[35px]" : "h-[50px]"
           } table-row `,
-          td: "px-0 pr-[8px]",
+          td: "px-0 pl-2",
         }}
       >
         <TableHeader columns={columns}>

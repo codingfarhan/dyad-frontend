@@ -3,46 +3,41 @@
 import ButtonComponent from "@/components/reusable/ButtonComponent";
 import KeroseneCard from "@/components/KeroseneCard/KeroseneCard";
 import NoteCard from "@/components/NoteCard/NoteCard";
-import {EarnKeroseneContent} from "@/components/earn-kerosene";
+import { EarnKeroseneContent } from "@/components/earn-kerosene";
 
 import SortbyComponent from "@/components/reusable/SortbyComponent";
-import {SORT_BY_OPTIONS} from "@/mockData/tabsMockData";
-import {useState} from "react";
-import {ClaimModalContent} from "@/components/claim-modal-content";
-import {useQuery} from "@tanstack/react-query";
-import {alchemySdk} from "@/lib/alchemy";
-import {useAccount} from "wagmi";
-import {dNftAddress, useReadDNftBalanceOf, useReadDNftTokenOfOwnerByIndex} from "@/generated";
-import {defaultChain} from "@/lib/config";
-import {SnapshotClaim} from "@/components/NoteCard/Children/SnapshotClaim";
+import { SORT_BY_OPTIONS } from "@/mockData/tabsMockData";
+import { useState } from "react";
+import { ClaimModalContent } from "@/components/claim-modal-content";
+import { alchemySdk } from "@/lib/alchemy";
+import { useAccount } from "wagmi";
+import {
+  dNftAddress,
+  useReadDNftBalanceOf,
+  useReadDNftTokenOfOwnerByIndex,
+} from "@/generated";
+import { defaultChain } from "@/lib/config";
+import { SnapshotClaim } from "@/components/NoteCard/Children/SnapshotClaim";
 import useIDsByOwner from "@/hooks/useIDsByOwner";
 import dynamic from "next/dynamic";
+import { useQuery, gql } from "@apollo/client";
+import NoteTable from "@/components/note-table";
 
 const TabsComponent = dynamic(
   () => import("@/components/reusable/TabsComponent"),
-  {ssr: false}
+  { ssr: false }
 );
 
 export default function Home() {
   const [selectedValue, setSelectedValue] = useState("");
-  const {address} = useAccount();
-  const {data: notes} = useQuery({
-    queryKey: ["notes", address],
-    queryFn: () =>
-      alchemySdk.nft
-        .getNftsForOwner(address as string, {
-          contractAddresses: [dNftAddress[defaultChain.id]],
-        })
-        .then((res) => res.ownedNfts.map((nft) => nft.tokenId)),
-  });
+  const { address } = useAccount();
 
-  const {data: balance} = useReadDNftBalanceOf({
+  const { data: balance } = useReadDNftBalanceOf({
     args: [address],
     chainId: defaultChain.id,
   });
 
-
-  const {tokens} = useIDsByOwner(address, balance)
+  const { tokens } = useIDsByOwner(address, balance);
 
   const keroseneCardsData = [
     {
@@ -115,6 +110,11 @@ export default function Home() {
       label: "Check Eligibility",
       tabKey: "airdrop",
       content: <SnapshotClaim />,
+    },
+    {
+      label: "Notes Ranking",
+      tabKey: "notes-ranking",
+      content: <NoteTable />,
     },
   ];
 
