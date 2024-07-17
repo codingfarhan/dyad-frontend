@@ -3,6 +3,7 @@ import useModal from "@/contexts/modal";
 import React from "react";
 import { useQuery, gql } from "@apollo/client";
 import { formatCurrency } from "@/utils/currency";
+import Loader from "./loader";
 
 const NoteTable: React.FC<any> = ({}) => {
   const { pushModal } = useModal();
@@ -26,10 +27,10 @@ const NoteTable: React.FC<any> = ({}) => {
     }
   `;
   const { loading, error, data } = useQuery(GET_ITEMS);
-  console.log("XXX", data);
 
   function parseRows(items) {
     return items
+      .filter((item) => parseFloat(item.dyad) !== 0)
       .map((item) => ({
         ...item,
         collatRatio: (parseFloat(item.collatRatio) / 1e16).toFixed(0) + "%",
@@ -37,9 +38,13 @@ const NoteTable: React.FC<any> = ({}) => {
           (parseFloat(item.kerosene) / 1e18).toFixed(0)
         ).slice(1),
         dyad: formatCurrency((parseFloat(item.dyad) / 1e18).toFixed(0)),
-        xp: (parseFloat(item.xp) / 1e18).toFixed(0),
+        xp: (parseFloat(item.xp) / 1e18 / 1e6).toFixed(0) + "M",
       }))
-      .sort((a, b) => parseFloat(b.xp) - parseFloat(a.xp));
+      .sort((a, b) => parseFloat(b.xp) - parseFloat(a.xp))
+      .map((item, index) => ({
+        ...item,
+        rank: index + 1,
+      }));
   }
 
   const parsedData =
@@ -47,10 +52,15 @@ const NoteTable: React.FC<any> = ({}) => {
 
   return (
     <div>
+      {loading && <Loader />}
       {!loading && !error && (
         <div className="h-[500px]">
           <TableComponent
             columns={[
+              {
+                key: "rank",
+                label: "Rank",
+              },
               {
                 key: "id",
                 label: "Note",
