@@ -11,6 +11,8 @@ import { useTransactionStore } from "@/lib/store";
 import {
   dyadAbi,
   dyadAddress,
+  useReadXpBalanceOfNote,
+  useReadXpTotalSupply,
   vaultManagerAbi,
   vaultManagerAddress,
   wEthVaultAbi,
@@ -37,6 +39,14 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
   const [inputValue, setInputValue] = useState("");
   const { address } = useAccount();
   const { setTransactionData } = useTransactionStore();
+
+  console.log("tokenId", tokenId);
+
+  const { data: xpBalanceOfNote } = useReadXpBalanceOfNote({
+    args: [BigInt(tokenId)],
+  });
+
+  const { data: xpTotalSupply } = useReadXpTotalSupply();
 
   const { data: contractData } = useReadContracts({
     allowFailure: false,
@@ -86,7 +96,7 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
         abi: erc20Abi,
         functionName: "balanceOf",
         args: [address!],
-      }
+      },
     ],
     query: {
       select: (data) => ({
@@ -96,28 +106,32 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
         assetValue: data[3],
         allowance: data[4],
         minCollateralizationRatio: data[5],
-        balance: data[6]
-      })
-    }
+        balance: data[6],
+      }),
+    },
   });
 
   const newCr =
     ((fromBigNumber(contractData?.collateralValue) +
       (action === "deposit"
         ? fromBigNumber(inputValue) * fromBigNumber(contractData?.assetValue, 8)
-        : -fromBigNumber(inputValue) * fromBigNumber(contractData?.assetValue, 8))) /
+        : -fromBigNumber(inputValue) *
+          fromBigNumber(contractData?.assetValue, 8))) /
       fromBigNumber(contractData?.mintedDyad)) *
     100;
 
   const theoreticalMaxWithdraw = useMemo(() => {
     const totalAssetDeposited = fromBigNumber(contractData?.totalDeposited);
-    const price = fromBigNumber(contractData?.assetValue, 8)
+    const price = fromBigNumber(contractData?.assetValue, 8);
 
-    const totalCollateral = fromBigNumber(contractData?.collateralValue)
-    const totalDyad = fromBigNumber(contractData?.mintedDyad)
-    const minCollateralRatio = fromBigNumber(contractData?.minCollateralizationRatio);
+    const totalCollateral = fromBigNumber(contractData?.collateralValue);
+    const totalDyad = fromBigNumber(contractData?.mintedDyad);
+    const minCollateralRatio = fromBigNumber(
+      contractData?.minCollateralizationRatio
+    );
 
-    const maxWithdraw = ((totalCollateral - (totalDyad * minCollateralRatio)) / price) - 0.000001;
+    const maxWithdraw =
+      (totalCollateral - totalDyad * minCollateralRatio) / price - 0.000001;
 
     if (maxWithdraw < totalAssetDeposited) {
       return toBigNumber(maxWithdraw);
@@ -154,21 +168,43 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
           </ButtonComponent>
         </div>
       </div>
-      {contractData?.mintedDyad !== 0n && !!contractData?.mintedDyad && action !== "redeem" && (
-        <div className="flex flex-col w-full justify-between font-semibold text-sm">
-          <div className="flex text-[#A1A1AA]">
-            <div className="mr-[5px]">Current collateralization ratio:</div>
-            <p>{formatNumber(fromBigNumber(collateralizationRatio, 16))}%</p>
+      {contractData?.mintedDyad !== 0n &&
+        !!contractData?.mintedDyad &&
+        action !== "redeem" && (
+          <div className="flex flex-col w-full justify-between font-semibold text-sm">
+            <div className="flex text-[#A1A1AA]">
+              <div className="mr-[5px]">Current collateralization ratio:</div>
+              <p>{formatNumber(fromBigNumber(collateralizationRatio, 16))}%</p>
+            </div>
+            <div className="flex">
+              <div className="mr-[5px] ">New collateralization ratio:</div>
+              <div>{formatNumber(newCr)}%</div>
+            </div>
           </div>
-          <div className="flex">
-            <div className="mr-[5px] ">New collateralization ratio:</div>
-            <div>{formatNumber(newCr)}%</div>
+        )}
+      {xpBalanceOfNote && xpTotalSupply && (
+        <div className="flex justify-between text-sm">
+          <div className="flex gap-2 text-[#A1A1AA]">
+            <div>XP: </div>
+            <div>{(parseFloat(xpBalanceOfNote) / 1e18).toFixed(0)}</div>
+          </div>
+          <div className="flex gap-2 text-[#A1A1AA]">
+            <div>XP Share: </div>
+            <div>
+              {(
+                (parseFloat(xpBalanceOfNote) /
+                  1e18 /
+                  (parseFloat(xpTotalSupply) / 1e18)) *
+                100
+              ).toFixed(4) + "%"}
+            </div>
           </div>
         </div>
       )}
-
       <div className="flex gap-8">
-        {contractData?.allowance !== undefined && contractData?.allowance < toBigNumber(inputValue, 0) && action === "deposit" ? (
+        {contractData?.allowance !== undefined &&
+        contractData?.allowance < toBigNumber(inputValue, 0) &&
+        action === "deposit" ? (
           <div className="w-[100px]">
             <ButtonComponent
               onClick={() =>

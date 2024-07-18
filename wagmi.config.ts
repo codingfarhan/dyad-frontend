@@ -8,6 +8,7 @@ import { vaultManagerAbi } from "@/lib/abi/VaultManager";
 import { vaultAbi } from "@/lib/abi/Vault";
 import { paymentsAbi } from "@/lib/abi/Payments";
 import { merkleClaimAbi } from "@/lib/abi/MerkleClaim";
+import { dyadXpAbi } from "@/lib/abi/DyadXp";
 import { erc20Abi } from "viem";
 import { angleDistributorAbi } from "./lib/abi/AngleDistributor";
 import { keroseneDnftClaimAbi } from "./lib/abi/KeroseneDnftClaim";
@@ -185,7 +186,7 @@ export default defineConfig({
         [mainnet.id]: "0xeF443646E52d1C28bd757F570D18F4Db30dB70F4",
         [anvil.id]: "0xeF443646E52d1C28bd757F570D18F4Db30dB70F4",
       },
-      abi: erc20Abi,
+      abi: dyadXpAbi,
     },
     {
       name: "Kerosene",
