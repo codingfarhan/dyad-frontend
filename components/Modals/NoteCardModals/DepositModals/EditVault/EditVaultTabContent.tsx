@@ -182,7 +182,7 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
             </div>
           </div>
         )}
-      {xpBalanceOfNote && xpTotalSupply && (
+      {xpBalanceOfNote !== undefined && xpTotalSupply !== undefined && (
         <div className="flex justify-between text-sm">
           <div className="flex gap-2 text-[#A1A1AA]">
             <div>XP: </div>
