@@ -40,8 +40,6 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
   const { address } = useAccount();
   const { setTransactionData } = useTransactionStore();
 
-  console.log("tokenId", tokenId);
-
   const { data: xpBalanceOfNote } = useReadXpBalanceOfNote({
     args: [BigInt(tokenId)],
   });
