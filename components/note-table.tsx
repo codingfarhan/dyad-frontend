@@ -17,6 +17,7 @@ const NoteTable: React.FC<any> = ({}) => {
           kerosene
           dyad
           xp
+          collateral
         }
       }
     }
@@ -40,6 +41,9 @@ const NoteTable: React.FC<any> = ({}) => {
               100
             ).toFixed(2) + "%"
           : "N/A",
+        collateral: formatCurrency(
+          (parseFloat(item.collateral) / 1e18).toFixed(0)
+        ),
       }))
       .sort((a, b) => parseFloat(b.xp) - parseFloat(a.xp))
       .map((item, index) => ({
@@ -81,6 +85,10 @@ const NoteTable: React.FC<any> = ({}) => {
               {
                 key: "dyad",
                 label: "DYAD",
+              },
+              {
+                key: "collateral",
+                label: "Collateral",
               },
               {
                 key: "collatRatio",
