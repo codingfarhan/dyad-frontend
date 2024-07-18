@@ -34,7 +34,7 @@ const NoteTable: React.FC<any> = ({}) => {
           (parseFloat(item.kerosene) / 1e18).toFixed(0)
         ).slice(1),
         dyad: formatCurrency((parseFloat(item.dyad) / 1e18).toFixed(0)),
-        xp: (parseFloat(item.xp) / 1e18 / 1e6).toFixed(0) + "M",
+        xp: (parseFloat(item.xp) / 1e18 / 1e9).toFixed(0),
         xpPercentage: totalSupply
           ? (
               (parseFloat(item.xp) / 1e18 / (parseFloat(totalSupply) / 1e18)) *
