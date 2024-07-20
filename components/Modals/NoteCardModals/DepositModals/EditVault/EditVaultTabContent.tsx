@@ -15,6 +15,7 @@ import {
   useReadXpTotalSupply,
   vaultManagerAbi,
   vaultManagerAddress,
+  keroseneVaultV2Address,
   wEthVaultAbi,
 } from "@/generated";
 import { defaultChain } from "@/lib/config";
@@ -180,23 +181,38 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
             </div>
           </div>
         )}
-      {xpBalanceOfNote !== undefined && xpTotalSupply !== undefined && (
-        <div className="flex justify-between text-sm">
-          <div className="flex gap-2 text-[#A1A1AA]">
-            <div>XP: </div>
-            <div>{(parseFloat(xpBalanceOfNote) / 1e18).toFixed(0)}</div>
-          </div>
-          <div className="flex gap-2 text-[#A1A1AA]">
-            <div>XP Share: </div>
-            <div>
-              {(
-                (parseFloat(xpBalanceOfNote) /
-                  1e18 /
-                  (parseFloat(xpTotalSupply) / 1e18)) *
-                100
-              ).toFixed(4) + "%"}
+      {vaultAddress === keroseneVaultV2Address[defaultChain.id] && (
+        <div>
+          {xpBalanceOfNote !== undefined && xpTotalSupply !== undefined && (
+            <div className="flex justify-between text-sm gap-4">
+              <div className="flex gap-2 text-[#A1A1AA]">
+                <div>XP: </div>
+                <div>
+                  {(parseFloat(xpBalanceOfNote) / 1e18 / 1e9).toFixed(0)}
+                </div>
+              </div>
+              <div className="flex gap-2 text-[#A1A1AA]">
+                <div>Accrual Rate: </div>
+                <div>
+                  {((0.000000001 * parseFloat(xpBalanceOfNote)) / 1e18).toFixed(
+                    2
+                  )}{" "}
+                  / sec
+                </div>
+              </div>
+              <div className="flex gap-2 text-[#A1A1AA]">
+                <div>XP Share: </div>
+                <div>
+                  {(
+                    (parseFloat(xpBalanceOfNote) /
+                      1e18 /
+                      (parseFloat(xpTotalSupply) / 1e18)) *
+                    100
+                  ).toFixed(4) + "%"}
+                </div>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
       <div className="flex gap-8">
