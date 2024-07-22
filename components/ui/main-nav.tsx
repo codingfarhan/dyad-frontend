@@ -29,18 +29,33 @@ export function MainNav({
       >
         DYAD
       </Link>
-      <div className="flex text-gray-400 text-xs pl-4">
+      <a
+        href="https://www.coingecko.com/en/coins/ethereum"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex text-gray-400 text-xs pl-4"
+      >
         <div className="font-semibold">ETH:</div>
         <div className="pl-1">${ethPrice.toFixed(0)}</div>
-      </div>
-      <div className="flex text-gray-400 text-xs pl-1">
+      </a>
+      <a
+        href="https://defillama.com/protocol/dyad#information"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex text-gray-400 text-xs pl-1"
+      >
         <div className="font-semibold">TVL:</div>
         <div className="pl-1">{formatCurrency(tvl)}</div>
-      </div>
-      <div className="flex text-gray-400 text-xs pl-6">
+      </a>
+      <a
+        href="https://www.coingecko.com/en/coins/kerosene"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex text-gray-400 text-xs pl-6"
+      >
         <div className="font-semibold">KERO:</div>
         <div className="pl-1">${kerosenePrice.toFixed(3)}</div>
-      </div>
+      </a>
       <div className="flex text-gray-400 text-xs pl-1">
         <div className="font-semibold">DV:</div>
         <div className="pl-1">
