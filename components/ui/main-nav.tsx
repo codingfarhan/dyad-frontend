@@ -1,26 +1,26 @@
 import Link from "next/link";
 
-import {cn} from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import useEthPrice from "@/hooks/useEthPrice";
+import useTvl from "@/hooks/useTvl";
 import useKerosenePrice from "@/hooks/useKerosenePrice";
-import {useReadKeroseneVaultV2AssetPrice} from "@/generated";
-import {fromBigNumber} from "@/lib/utils";
+import { useReadKeroseneVaultV2AssetPrice } from "@/generated";
+import { fromBigNumber } from "@/lib/utils";
+import { formatCurrency } from "@/utils/currency";
 
 export function MainNav({
   className,
   ...props
 }: React.HTMLAttributes<HTMLElement>) {
-  const {ethPrice} = useEthPrice();
-  const {kerosenePrice} = useKerosenePrice();
+  const { ethPrice } = useEthPrice();
+  const { kerosenePrice } = useKerosenePrice();
 
-  const {data: keroseneVaultAssetPrice} = useReadKeroseneVaultV2AssetPrice();
+  const { data: keroseneVaultAssetPrice } = useReadKeroseneVaultV2AssetPrice();
+  const { tvl } = useTvl();
 
   return (
     <nav
-      className={cn(
-        "flex justify-start items-center ",
-        className
-      )}
+      className={cn("flex justify-start items-center ", className)}
       {...props}
     >
       <Link
@@ -36,22 +36,14 @@ export function MainNav({
       <div className="flex text-gray-400 text-xs pl-2">
         <div>KERO: $</div>
         <div>{kerosenePrice.toFixed(3)}</div>
-        <div className="pl-2"> / DV: $</div>
+      </div>
+      <div className="flex text-gray-400 text-xs pl-2">
+        <div>DV: $</div>
         <div>{fromBigNumber(keroseneVaultAssetPrice, 8).toFixed(4)}</div>
       </div>
-      <div className="flex text-gray-400 text-xs"></div>
-      {/* <Link */}
-      {/*   href="/vaults" */}
-      {/*   className="text-sm font-bold text-muted-foreground transition-colors hover:text-primary" */}
-      {/* > */}
-      {/*   Vaults */}
-      {/* </Link> */}
-      {/* <Link
-        href="/notes"
-        className="text-sm font-bold text-muted-foreground transition-colors hover:text-primary"
-      >
-        Notes
-      </Link> */}
+      <div className="flex text-gray-400 text-xs pl-2">
+        <div>TVL:</div> <div className="pl-1">{formatCurrency(tvl)}</div>
+      </div>
     </nav>
   );
 }
