@@ -101,6 +101,11 @@ const NoteTable: React.FC<any> = ({}) => {
           />
         </div>
       )}
+      {!loading && !error && (
+        <div className="flex justify-end mt-4 text-sm">
+          *only Notes that minted DYAD are ranked
+        </div>
+      )}
     </div>
   );
 };
