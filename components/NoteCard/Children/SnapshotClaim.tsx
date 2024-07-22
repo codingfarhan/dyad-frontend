@@ -225,6 +225,9 @@ export const SnapshotClaim = () => {
       </div>
       {remainingPurchases !== undefined && remainingPurchases !== 0n && (
         <div className="flex flex-col bg-[#1A1A1A] gap-4 p-7 rounded-[10px] mt-5">
+          {!address && (
+            <div>Connect your Wallet to buy a Note with Kerosene!</div>
+          )}
           <p className="text-[#A1A1AA]">
             Buy Note with Kerosene{" "}
             <b>({remainingPurchases?.toString() || "0"} left)</b>
