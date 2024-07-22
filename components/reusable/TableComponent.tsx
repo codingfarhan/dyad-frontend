@@ -27,12 +27,20 @@ const TableComponent: React.FC<TableComponentProps> = ({
     direction: string;
   } | null>(null);
 
+  const parseValue = (value: string) => {
+    if (value === undefined || value === "") return 0;
+    value = String(value);
+    // Remove any non-numeric characters except for '.' and '-'
+    const numericValue = value.replace(/[^\d.-]/g, "");
+    return parseFloat(numericValue);
+  };
+
   const sortedRows = React.useMemo(() => {
     let sortableRows = [...rows];
     if (sortConfig !== null) {
       sortableRows.sort((a, b) => {
-        const aValue = parseFloat(getKeyValue(a, sortConfig.key));
-        const bValue = parseFloat(getKeyValue(b, sortConfig.key));
+        const aValue = parseValue(getKeyValue(a, sortConfig.key));
+        const bValue = parseValue(getKeyValue(b, sortConfig.key));
 
         if (aValue > bValue) {
           return sortConfig.direction === "ascending" ? -1 : 1;
