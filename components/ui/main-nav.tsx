@@ -42,10 +42,10 @@ export function MainNav({
         href="https://defillama.com/protocol/dyad#information"
         target="_blank"
         rel="noopener noreferrer"
-        className="flex text-gray-400 text-xs pl-1"
+        className="flex text-gray-400 text-xs pl-2"
       >
-        <div className="font-semibold">TVL:</div>
-        <div className="pl-1">{formatCurrency(tvl)}</div>
+        <div className="font-semibod">COLLAT:</div>
+        <div className="pl-1">${(tvl / 1000000).toFixed(2) + "M"}</div>
       </a>
       <a
         href="https://www.coingecko.com/en/coins/kerosene"
