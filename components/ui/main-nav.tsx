@@ -30,19 +30,22 @@ export function MainNav({
         DYAD
       </Link>
       <div className="flex text-gray-400 text-xs pl-4">
-        <div>ETH: $</div>
-        <div>{ethPrice.toFixed(0)}</div>
+        <div className="font-semibold">ETH:</div>
+        <div className="pl-1">${ethPrice.toFixed(0)}</div>
       </div>
-      <div className="flex text-gray-400 text-xs pl-2">
-        <div>KERO: $</div>
-        <div>{kerosenePrice.toFixed(3)}</div>
+      <div className="flex text-gray-400 text-xs pl-1">
+        <div className="font-semibold">TVL:</div>
+        <div className="pl-1">{formatCurrency(tvl)}</div>
       </div>
-      <div className="flex text-gray-400 text-xs pl-2">
-        <div>DV: $</div>
-        <div>{fromBigNumber(keroseneVaultAssetPrice, 8).toFixed(4)}</div>
+      <div className="flex text-gray-400 text-xs pl-6">
+        <div className="font-semibold">KERO:</div>
+        <div className="pl-1">${kerosenePrice.toFixed(3)}</div>
       </div>
-      <div className="flex text-gray-400 text-xs pl-2">
-        <div>TVL:</div> <div className="pl-1">{formatCurrency(tvl)}</div>
+      <div className="flex text-gray-400 text-xs pl-1">
+        <div className="font-semibold">DV:</div>
+        <div className="pl-1">
+          ${fromBigNumber(keroseneVaultAssetPrice, 8).toFixed(4)}
+        </div>
       </div>
     </nav>
   );
