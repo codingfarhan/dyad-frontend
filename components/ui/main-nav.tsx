@@ -44,7 +44,7 @@ export function MainNav({
         rel="noopener noreferrer"
         className="flex text-gray-400 text-xs pl-2"
       >
-        <div className="font-semibod">COLLAT:</div>
+        <div className="font-semibod">TVL:</div>
         <div className="pl-1">${(tvl / 1000000).toFixed(2) + "M"}</div>
       </a>
       <a
