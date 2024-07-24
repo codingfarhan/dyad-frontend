@@ -164,6 +164,7 @@ const NoteTable: React.FC<any> = ({}) => {
 
   const parsedData = useMemo(() => {
     const parseRows = (items: any) => {
+      const ownedDnftSet = new Set(ownedDnfts?.map(Number) || []);
       return (
         items
           //.filter((item: any) => parseFloat(item.dyad) !== 0)
@@ -196,11 +197,19 @@ const NoteTable: React.FC<any> = ({}) => {
             rank: index + 1,
             market: getMarketplaceAction(item.id),
           }))
+          .sort((a: any, b: any) => {
+            if (ownedDnftSet.has(Number(a.id))) {
+              return -1;
+            }
+            else {
+              return a.rank - b.rank
+            }
+          })
       );
     };
 
     return data && data.notes.items ? parseRows(data.notes.items) : [];
-  }, [data, totalSupply, getMarketplaceAction]);
+  }, [data, totalSupply, getMarketplaceAction, ownedDnfts]);
 
   return (
     <div>
