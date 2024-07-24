@@ -4,6 +4,7 @@ export default function useKerosenePrice() {
   const [kerosenePrice, setKerosenePrice] = useState(0);
 
   useMemo(() => {
+    return;
     async function getKerosenePrice() {
       const res = await fetch(
         "https://api.coingecko.com/api/v3/coins/kerosene/tickers"
