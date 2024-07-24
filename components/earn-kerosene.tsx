@@ -91,20 +91,12 @@ export function EarnKeroseneContent() {
             <div className="flex w-full flex justify-between items-center">
               <div className="text-2xl text-[#FAFAFA]  ">Step 1</div>
               <div>
-                Claim a Note or buy on{" "}
-                <a href="https://opensea.io/collection/dyad-nft">OpenSea</a>
+                Claim or buy a Note
               </div>
             </div>
             <div className="flex justify-between mt-[32px] w-full">
               <div className="w-full flex gap-4">
                 <ClaimModalContent />
-                <ButtonComponent
-                  onClick={() => {
-                    window.open("https://opensea.io/collection/dyad-nft");
-                  }}
-                >
-                  Buy on OpenSea
-                </ButtonComponent>
               </div>
             </div>
           </div>
