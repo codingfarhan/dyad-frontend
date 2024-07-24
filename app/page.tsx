@@ -112,7 +112,7 @@ export default function Home() {
       content: <SnapshotClaim />,
     },
     {
-      label: "Ranking",
+      label: "Marketplace",
       tabKey: "notes-ranking",
       content: <NoteTable />,
     },
