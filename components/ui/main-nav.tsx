@@ -54,7 +54,7 @@ export function MainNav({
         className="flex text-gray-400 text-xs pl-6"
       >
         <div className="font-semibold">KERO:</div>
-        <div className="pl-1">${kerosenePrice.toFixed(3)}</div>
+        <div className="pl-1">${kerosenePrice.toFixed(4)}</div>
       </a>
       <div className="flex text-gray-400 text-xs pl-1">
         <div className="font-semibold">DV:</div>
