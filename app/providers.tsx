@@ -30,7 +30,10 @@ const apolloClient = new ApolloClient({
   cache: new InMemoryCache(),
 });
 
-const theme = darkTheme();
+const theme = darkTheme({
+  font: "Inter",
+  borderRadius: "5px"
+});
 
 export const Providers = ({ children }: { children: ReactNode }) => {
   return (

@@ -262,7 +262,6 @@ const NoteTable: React.FC<any> = ({}) => {
         oracleEnabled={true}
         onGoToToken={() => console.log("Awesome!")}
         onListingComplete={(data) => {
-          console.log("Listing Complete", data);
           mutateListings();
         }}
       />
