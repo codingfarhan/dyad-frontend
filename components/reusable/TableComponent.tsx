@@ -45,7 +45,7 @@ const TableComponent: React.FC<TableComponentProps> = ({
         if (aValue > bValue) {
           return sortConfig.direction === "ascending" ? -1 : 1;
         }
-        if (aValue > bValue) {
+        if (aValue < bValue) {
           return sortConfig.direction === "ascending" ? 1 : -1;
         }
         return 0;
@@ -55,15 +55,16 @@ const TableComponent: React.FC<TableComponentProps> = ({
   }, [rows, sortConfig]);
 
   const requestSort = (key: string) => {
-    let direction = "ascending";
-    if (
-      sortConfig &&
-      sortConfig.key === key &&
-      sortConfig.direction === "ascending"
-    ) {
-      direction = "descending";
-    }
-    setSortConfig({ key, direction });
+    setSortConfig((oldValue) => {
+      let direction = "ascending";
+      if (
+        oldValue 
+        && oldValue.key === key 
+        && oldValue.direction === "ascending") {
+        direction = "descending";
+      }
+      return { key, direction };
+    })
   };
 
   return (
@@ -85,7 +86,7 @@ const TableComponent: React.FC<TableComponentProps> = ({
           {(column: any) => (
             <TableColumn
               key={column.key}
-              onClick={() => requestSort(column.key)}
+              onClick={() => requestSort(column.sortKey || column.key)}
               style={{ cursor: "pointer" }}
             >
               {column.label}
