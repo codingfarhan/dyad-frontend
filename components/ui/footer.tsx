@@ -15,7 +15,7 @@ export function Footer({
       {...props}
     >
       <Link
-        href="https://www.notion.so/dyadstable/DYAD-design-outline-v3-28b79ebd6acb42009ff5a751c3158781?pvs=4"
+        href="https://dyad.gitbook.io/dyad-docs-v2"
         className="text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
       >
         Docs
