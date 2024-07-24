@@ -113,7 +113,7 @@ export default function Home() {
     },
     {
       label: "Marketplace",
-      tabKey: "notes-ranking",
+      tabKey: "marketplace",
       content: <NoteTable />,
     },
   ];

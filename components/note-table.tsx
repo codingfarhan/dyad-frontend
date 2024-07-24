@@ -81,17 +81,21 @@ const NoteTable: React.FC<any> = ({}) => {
   `;
   const { loading, error, data } = useQuery(GET_ITEMS);
 
-  const getMarketplaceAction = useCallback(
+  const getMarketplaceData = useCallback(
     (id: string) => {
+      const match = allListings
+        .filter((listing) => listing.criteria?.data?.token?.tokenId === id)
+        .sort(
+          (a, b) => (a.price?.amount?.usd || 0) - (b.price?.amount?.usd || 0)
+        );
+      let cheapestListing: any;
+      if (match.length > 0) {
+        cheapestListing = match[0];
+      }
+      let component: React.ReactNode | undefined = undefined;
       if (ownedDnfts && new Set(ownedDnfts.map(Number)).has(Number(id))) {
-        const match = allListings
-          .filter((listing) => listing.criteria?.data?.token?.tokenId === id)
-          .sort(
-            (a, b) => (a.price?.amount?.usd || 0) - (b.price?.amount?.usd || 0)
-          );
-
         if (match.length > 0) {
-          return (
+          component = (
             <div className="flex gap-2">
               <button
                 className="rounded-[5px] bg-[#282828] text-sm min-w-fit px-4 py-0.5 hover:bg-[#393939]"
@@ -115,41 +119,38 @@ const NoteTable: React.FC<any> = ({}) => {
               </button>
             </div>
           );
-        }
-
-        return (
-          <button
-            className="rounded-[5px] bg-[#282828] text-sm min-w-fit px-4 py-0.5 hover:bg-[#393939]"
-            onClick={() => {
-              setSelectedId(id);
-              listModalOpenState[1](true);
-            }}
-          >
-            List
-          </button>
-        );
-      } else if (allListings) {
-        const match = allListings
-          .filter((listing) => listing.criteria?.data?.token?.tokenId === id)
-          .sort(
-            (a, b) => (a.price?.amount?.usd || 0) - (b.price?.amount?.usd || 0)
-          );
-        if (match.length > 0) {
-          const cheapest = match[0];
-          return (
+        } else {
+          component = (
             <button
               className="rounded-[5px] bg-[#282828] text-sm min-w-fit px-4 py-0.5 hover:bg-[#393939]"
               onClick={() => {
                 setSelectedId(id);
-                buyModalOpenState[1](true);
+                listModalOpenState[1](true);
               }}
             >
-              Buy {cheapest.price?.amount?.decimal}{" "}
-              {cheapest.price?.currency?.symbol}
+              List
             </button>
           );
         }
+      } else if (cheapestListing) {
+        component = (
+          <button
+            className="rounded-[5px] bg-[#282828] text-sm min-w-fit px-4 py-0.5 hover:bg-[#393939]"
+            onClick={() => {
+              setSelectedId(id);
+              buyModalOpenState[1](true);
+            }}
+          >
+            Buy {cheapestListing.price?.amount?.decimal}{" "}
+            {cheapestListing.price?.currency?.symbol}
+          </button>
+        );
       }
+
+      return {
+        priceNormalized: cheapestListing?.price?.amount?.usd || Number.MAX_SAFE_INTEGER,
+        market: component,
+      };
     },
     [
       ownedDnfts,
@@ -158,7 +159,7 @@ const NoteTable: React.FC<any> = ({}) => {
       buyModalOpenState,
       editModalOpenState,
       setSelectedListingId,
-      cancelModalOpenState
+      cancelModalOpenState,
     ]
   );
 
@@ -195,21 +196,20 @@ const NoteTable: React.FC<any> = ({}) => {
           .map((item, index) => ({
             ...item,
             rank: index + 1,
-            market: getMarketplaceAction(item.id),
+            ...getMarketplaceData(item.id),
           }))
           .sort((a: any, b: any) => {
             if (ownedDnftSet.has(Number(a.id))) {
               return -1;
-            }
-            else {
-              return a.rank - b.rank
+            } else {
+              return a.rank - b.rank;
             }
           })
       );
     };
 
     return data && data.notes.items ? parseRows(data.notes.items) : [];
-  }, [data, totalSupply, getMarketplaceAction, ownedDnfts]);
+  }, [data, totalSupply, getMarketplaceData, ownedDnfts]);
 
   return (
     <div>
@@ -304,6 +304,7 @@ const NoteTable: React.FC<any> = ({}) => {
               },
               {
                 key: "market",
+                sortKey: "priceNormalized",
                 label: "Market",
               },
             ]}
