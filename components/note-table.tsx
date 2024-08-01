@@ -145,10 +145,17 @@ const NoteTable: React.FC<any> = ({}) => {
             {cheapestListing.price?.currency?.symbol}
           </button>
         );
+      } else {
+        component = (
+          <span className="rounded-[5px] bg-[#282828] text-sm min-w-fit px-4 py-0.5">
+            n/a
+          </span>
+        );
       }
 
       return {
-        priceNormalized: cheapestListing?.price?.amount?.usd || Number.MAX_SAFE_INTEGER,
+        priceNormalized:
+          cheapestListing?.price?.amount?.usd || Number.MAX_SAFE_INTEGER,
         market: component,
       };
     },
