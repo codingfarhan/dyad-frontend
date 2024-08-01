@@ -146,11 +146,7 @@ const NoteTable: React.FC<any> = ({}) => {
           </button>
         );
       } else {
-        component = (
-          <span className="rounded-[5px] bg-[#282828] text-sm min-w-fit px-4 py-0.5">
-            n/a
-          </span>
-        );
+        component = <span className="text-sm min-w-fit px-4 py-0.5">N/A</span>;
       }
 
       return {
