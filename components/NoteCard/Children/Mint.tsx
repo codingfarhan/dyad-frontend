@@ -10,6 +10,7 @@ import {
   useReadVaultManagerGetTotalValue,
   useReadVaultManagerMinCollatRatio,
   vaultManagerAbi,
+  useReadVaultManagerGetVaultsValues,
   vaultManagerAddress,
 } from "@/generated";
 import { defaultChain } from "@/lib/config";
@@ -30,6 +31,10 @@ const Mint: React.FC<MintProps> = ({ dyadMinted, currentCr, tokenId }) => {
 
   const { address } = useAccount();
 
+  const { data: exoCollat } = useReadVaultManagerGetVaultsValues({
+    args: [BigInt(tokenId)],
+  });
+
   const { data: mintedDyad } = useReadDyadMintedDyad({
     args: [BigInt(tokenId)],
     chainId: defaultChain.id,
@@ -40,16 +45,17 @@ const Mint: React.FC<MintProps> = ({ dyadMinted, currentCr, tokenId }) => {
     chainId: defaultChain.id,
     query: {
       enabled: !!address,
-    }
-  })
+    },
+  });
 
   const { data: collateralValue } = useReadVaultManagerGetTotalValue({
     args: [BigInt(tokenId)],
     chainId: defaultChain.id,
   });
 
-  const { data: minCollateralizationRatio } =
-    useReadVaultManagerMinCollatRatio({ chainId: defaultChain.id });
+  const { data: minCollateralizationRatio } = useReadVaultManagerMinCollatRatio(
+    { chainId: defaultChain.id }
+  );
 
   const newCr =
     (mintedDyad || 0n) +
@@ -159,6 +165,12 @@ const Mint: React.FC<MintProps> = ({ dyadMinted, currentCr, tokenId }) => {
           <div className="mr-[5px]">DYAD minted:</div>
           <div>{dyadMinted}</div>
         </div>
+        {exoCollat && (
+          <div className="flex">
+            <div className="mr-[5px]">Exogenous Collateral:</div>
+            <div>${formatNumber(fromBigNumber(exoCollat[0], 18))}</div>
+          </div>
+        )}
         <div className="flex">
           <div className="mr-[5px]">Current CR:</div>
           <p>
