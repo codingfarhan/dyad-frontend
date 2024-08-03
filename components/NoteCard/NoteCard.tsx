@@ -111,7 +111,7 @@ function NoteCard({ tokenId }: { tokenId: string }) {
     },
     {
       text: "Exogenous Collateral",
-      value: exoCollat ? formatNumber(fromBigNumber(exoCollat[0])) : 0,
+      value: exoCollat ? `$${formatNumber(fromBigNumber(exoCollat[0]))}` : 0,
       highlighted: false,
     },
   ];
