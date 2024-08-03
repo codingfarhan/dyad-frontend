@@ -90,7 +90,7 @@ const Mint: React.FC<MintProps> = ({ dyadMinted, currentCr, tokenId }) => {
     const mintableDyad =
       mintableDyadFromExoCollat > mintableDyadFromCR
         ? mintableDyadFromCR
-        : toBigNumber(mintableDyadFromExoCollat);
+        : toBigNumber(Math.round(mintableDyadFromExoCollat));
 
     setMintInputValue(mintableDyad.toString());
   };
