@@ -69,16 +69,26 @@ const Mint: React.FC<MintProps> = ({ dyadMinted, currentCr, tokenId }) => {
       : 0n;
 
   const onMaxMintHandler = () => {
-    setMintInputValue(
-      toBigNumber(
-        Math.round(
-          (fromBigNumber(collateralValue) -
-            fromBigNumber(minCollateralizationRatio) *
-              fromBigNumber(mintedDyad)) /
-            fromBigNumber(minCollateralizationRatio)
-        )
-      ).toString()
+    const mintableDyadFromCR = toBigNumber(
+      Math.round(
+        (fromBigNumber(collateralValue) -
+          fromBigNumber(minCollateralizationRatio) *
+            fromBigNumber(mintedDyad)) /
+          fromBigNumber(minCollateralizationRatio)
+      )
     );
+
+    const _exoCollat = exoCollat ? fromBigNumber(exoCollat[0]) : 0n;
+
+    const _mintedDyad = fromBigNumber(mintedDyad);
+
+    const mintableDyadFromExoCollat = _exoCollat - _mintedDyad;
+
+    if (mintableDyadFromExoCollat > mintableDyadFromCR) {
+      setMintInputValue(mintableDyadFromCR.toString());
+    } else {
+      setMintInputValue(toBigNumber(mintableDyadFromExoCollat).toString());
+    }
   };
 
   const onMaxBurnHandler = () => {
