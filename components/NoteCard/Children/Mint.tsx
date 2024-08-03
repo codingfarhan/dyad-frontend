@@ -69,26 +69,30 @@ const Mint: React.FC<MintProps> = ({ dyadMinted, currentCr, tokenId }) => {
       : 0n;
 
   const onMaxMintHandler = () => {
+    const collateral = fromBigNumber(collateralValue);
+    const minCollatRatio = fromBigNumber(minCollateralizationRatio);
+    const mintedDyadAmount = fromBigNumber(mintedDyad);
+
+    // Calculate mintable DYAD from Collateral Ratio (CR)
     const mintableDyadFromCR = toBigNumber(
       Math.round(
-        (fromBigNumber(collateralValue) -
-          fromBigNumber(minCollateralizationRatio) *
-            fromBigNumber(mintedDyad)) /
-          fromBigNumber(minCollateralizationRatio)
+        (collateral - minCollatRatio * mintedDyadAmount) / minCollatRatio
       )
     );
 
-    const _exoCollat = exoCollat ? fromBigNumber(exoCollat[0]) : 0n;
+    // Get exogenous collateral if available, else set to 0
+    const exoCollatValue = exoCollat ? fromBigNumber(exoCollat[0]) : 0n;
 
-    const _mintedDyad = fromBigNumber(mintedDyad);
+    // Calculate mintable DYAD from exogenous collateral
+    const mintableDyadFromExoCollat = exoCollatValue - mintedDyadAmount;
 
-    const mintableDyadFromExoCollat = _exoCollat - _mintedDyad;
+    // Set the mint input value to the smaller of the two calculated values
+    const mintableDyad =
+      mintableDyadFromExoCollat > mintableDyadFromCR
+        ? mintableDyadFromCR
+        : toBigNumber(mintableDyadFromExoCollat);
 
-    if (mintableDyadFromExoCollat > mintableDyadFromCR) {
-      setMintInputValue(mintableDyadFromCR.toString());
-    } else {
-      setMintInputValue(toBigNumber(mintableDyadFromExoCollat).toString());
-    }
+    setMintInputValue(mintableDyad.toString());
   };
 
   const onMaxBurnHandler = () => {
