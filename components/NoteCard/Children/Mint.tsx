@@ -86,6 +86,11 @@ const Mint: React.FC<MintProps> = ({ dyadMinted, currentCr, tokenId }) => {
     // Calculate mintable DYAD from exogenous collateral
     const mintableDyadFromExoCollat = exoCollatValue - mintedDyadAmount;
 
+    if (mintableDyadFromExoCollat < 0) {
+      setMintInputValue("0");
+      return;
+    }
+
     // Set the mint input value to the smaller of the two calculated values
     const mintableDyad =
       mintableDyadFromExoCollat > mintableDyadFromCR
