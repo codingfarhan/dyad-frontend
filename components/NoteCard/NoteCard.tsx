@@ -11,35 +11,41 @@ import {
   vaultManagerAbi,
   vaultManagerAddress,
   wEthVaultAbi,
+  useReadVaultManagerGetVaultsValues,
 } from "@/generated";
-import {defaultChain} from "@/lib/config";
+import { defaultChain } from "@/lib/config";
 import NoteNumber from "./Children/NoteNumber";
-import {NoteNumberDataColumnModel} from "@/models/NoteCardModels";
-import {TabsDataModel} from "@/models/TabsModel";
-import Deposit, {supportedVaults} from "./Children/Deposit";
+import { NoteNumberDataColumnModel } from "@/models/NoteCardModels";
+import { TabsDataModel } from "@/models/TabsModel";
+import Deposit, { supportedVaults } from "./Children/Deposit";
 import Mint from "./Children/Mint";
-import {useReadContract, useReadContracts} from "wagmi";
-import {maxUint256} from "viem";
-import {formatNumber, fromBigNumber} from "@/lib/utils";
-import {vaultInfo} from "@/lib/constants";
+import { useReadContract, useReadContracts } from "wagmi";
+import { maxUint256 } from "viem";
+import { formatNumber, fromBigNumber } from "@/lib/utils";
+import { vaultInfo } from "@/lib/constants";
 
-function NoteCard({tokenId}: {tokenId: string}) {
-  const {data: collatRatio} = useReadVaultManagerCollatRatio({
+function NoteCard({ tokenId }: { tokenId: string }) {
+  const { data: collatRatio } = useReadVaultManagerCollatRatio({
     args: [BigInt(tokenId)],
     chainId: defaultChain.id,
   });
 
-  const {data: mintedDyad} = useReadDyadMintedDyad({
+  const { data: exoCollat } = useReadVaultManagerGetVaultsValues({
+    args: [BigInt(tokenId)],
+  });
+  console.log("xxx", exoCollat);
+
+  const { data: mintedDyad } = useReadDyadMintedDyad({
     args: [BigInt(tokenId)],
     chainId: defaultChain.id,
   });
 
-  const {data: collateralValue} = useReadVaultManagerGetTotalValue({
+  const { data: collateralValue } = useReadVaultManagerGetTotalValue({
     args: [BigInt(tokenId)],
     chainId: defaultChain.id,
   });
 
-  const {data: hasVaultData} = useReadContracts({
+  const { data: hasVaultData } = useReadContracts({
     contracts: supportedVaults.map((address) => ({
       address: vaultManagerAddress[defaultChain.id],
       abi: vaultManagerAbi,
@@ -51,7 +57,7 @@ function NoteCard({tokenId}: {tokenId: string}) {
   });
   const hasVault = (hasVaultData?.filter((data) => !!data)?.length || 0) > 0;
 
-  const {data: vaultCollateral} = useReadContracts({
+  const { data: vaultCollateral } = useReadContracts({
     contracts: supportedVaults.map((address) => ({
       address: address,
       abi: wEthVaultAbi,
@@ -69,8 +75,9 @@ function NoteCard({tokenId}: {tokenId: string}) {
     }))
     .filter((data) => !!data.value);
 
-  const {data: minCollateralizationRatio} =
-    useReadVaultManagerMinCollatRatio({chainId: defaultChain.id});
+  const { data: minCollateralizationRatio } = useReadVaultManagerMinCollatRatio(
+    { chainId: defaultChain.id }
+  );
 
   const totalCollateral = `$${formatNumber(fromBigNumber(collateralValue))}`;
   const collateralizationRatio =
@@ -80,7 +87,9 @@ function NoteCard({tokenId}: {tokenId: string}) {
   const totalDyad = `${fromBigNumber(mintedDyad)}`;
 
   const mintableDyad = useMemo(() => {
-    const maxDyad = (collateralValue || 0n) * 1000000000000000000n / (minCollateralizationRatio || 1n);
+    const maxDyad =
+      ((collateralValue || 0n) * 1000000000000000000n) /
+      (minCollateralizationRatio || 1n);
     return maxDyad - (mintedDyad || 0n);
   }, [collateralValue, minCollateralizationRatio, mintedDyad]);
 
@@ -100,6 +109,11 @@ function NoteCard({tokenId}: {tokenId: string}) {
       value: totalCollateral,
       highlighted: false,
     },
+    {
+      text: "Exogenous Collateral",
+      value: exoCollat ? formatNumber(fromBigNumber(exoCollat[0])) : 0,
+      highlighted: false,
+    },
   ];
 
   const tabData: TabsDataModel[] = [
@@ -109,10 +123,7 @@ function NoteCard({tokenId}: {tokenId: string}) {
       content: hasVault ? (
         <NoteNumber
           data={noteData}
-          dyad={[
-            fromBigNumber(mintableDyad),
-            fromBigNumber(mintedDyad),
-          ]}
+          dyad={[fromBigNumber(mintableDyad), fromBigNumber(mintedDyad)]}
           collateral={vaultUsd as any}
         />
       ) : (
