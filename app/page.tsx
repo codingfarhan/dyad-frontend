@@ -97,7 +97,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="flex-1 max-w-screen-md w-[745px] p-4 mt-4">
+    <div className="flex-1 max-w-screen-md w-full p-4 mt-4">
       <TabsComponent tabsData={tabsData} urlUpdate />
     </div>
   );
