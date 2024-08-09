@@ -10,8 +10,11 @@ export default function useKerosenePrice() {
     }
   );
 
+  const isLoading = !data && !error;
+
   return {
     kerosenePrice: data || 0,
     error: error,
+    isLoading: isLoading,
   };
 }
