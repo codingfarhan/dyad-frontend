@@ -31,26 +31,33 @@ export const fromBigNumber = (
   number: bigint | string | undefined,
   decimals = 18
 ) => {
-  if (!number || number === '.' || number === '0.') return 0
-  if (typeof number === 'string') number = BigInt(number)
-  return parseFloat(formatUnits(number, decimals))
-}
+  if (!number || number === "." || number === "0." || number === "n/a")
+    return NaN;
+
+  try {
+    if (typeof number === "string") number = BigInt(number);
+  } catch (e) {
+    return NaN; // Return NaN or handle the error as needed
+  }
+
+  return parseFloat(formatUnits(number, decimals));
+};
 
 export const toBigNumber = (number: number | string, decimals = 18) => {
-  if (!number) return BigInt(0)
-  return parseUnits(`${number}`, decimals)
-}
+  if (!number) return BigInt(0);
+  return parseUnits(`${number}`, decimals);
+};
 
 const getLocale = () => {
-  return typeof navigator !== 'undefined' ? navigator.language : 'en-US'
-}
+  return typeof navigator !== "undefined" ? navigator.language : "en-US";
+};
 
 export const formatNumber = (amount: number | string, decimals = 2): string => {
-  const locale = getLocale()
-  const numberForm = parseFloat(`${amount}`)
+  const locale = getLocale();
+  const numberForm = parseFloat(`${amount}`);
 
-  return new Intl.NumberFormat([locale, 'en-US'], {
+  return new Intl.NumberFormat([locale, "en-US"], {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
-  }).format(numberForm)
-}
+  }).format(numberForm);
+};
