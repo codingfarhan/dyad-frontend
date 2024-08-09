@@ -38,25 +38,27 @@ export function EarnKeroseneContent() {
       },
     });
 
-  const { kerosenePrice } = useKerosenePrice();
+  const { kerosenePrice, error: kerosenePriceError } = useKerosenePrice();
 
   const { totalUsd, claimableUsd } = useMemo(() => {
-    if (merklRewards === undefined || kerosenePrice === undefined) {
-      return { totalUsd: 0, claimableUsd: 0 };
+    if (!merklRewards || !kerosenePrice) {
+      return { totalUsd: "0", claimableUsd: "0" };
     }
 
-    let totalUsd =
-      Number(formatEther(merklRewards.accumulated || 0n)) * kerosenePrice;
-    totalUsd = Number(totalUsd.toFixed(2));
+    try {
+      const totalUsd =
+        Number(formatEther(merklRewards.accumulated || 0n)) * kerosenePrice;
+      const claimableUsd =
+        Number(formatEther(merklRewards.unclaimed || 0n)) * kerosenePrice;
 
-    let claimableUsd =
-      Number(formatEther(merklRewards.unclaimed || 0n)) * kerosenePrice;
-    claimableUsd = Number(claimableUsd.toFixed(2));
-
-    return {
-      totalUsd: totalUsd.toLocaleString(),
-      claimableUsd: claimableUsd.toLocaleString(),
-    };
+      return {
+        totalUsd: totalUsd.toFixed(2).toLocaleString(),
+        claimableUsd: claimableUsd.toFixed(2).toLocaleString(),
+      };
+    } catch (e) {
+      console.error("Error calculating USD values", e);
+      return { totalUsd: "0", claimableUsd: "0" };
+    }
   }, [merklRewards, kerosenePrice]);
 
   const {
@@ -80,8 +82,11 @@ export function EarnKeroseneContent() {
     <div>
       {merklData && (
         <div className="flex justify-between text-2xl p-[2rem] pl-[5rem] pr-[5rem] font-bold">
-          <div>{merklData.apr.toFixed(0)}% APR</div>
-          <div>Liquidity: ${Number(merklData.tvl.toFixed(0)).toLocaleString()}</div>
+          <div>{merklData.apr?.toFixed(0) || 0}% APR</div>
+          <div>
+            Liquidity: $
+            {Number(merklData.tvl?.toFixed(0) || 0).toLocaleString()}
+          </div>
         </div>
       )}
 
@@ -89,10 +94,8 @@ export function EarnKeroseneContent() {
         <NoteCardsContainer>
           <div className="text-sm font-semibold text-[#A1A1AA]">
             <div className="flex w-full flex justify-between items-center">
-              <div className="text-2xl text-[#FAFAFA]  ">Step 1</div>
-              <div>
-                Claim or buy a Note
-              </div>
+              <div className="text-2xl text-[#FAFAFA]">Step 1</div>
+              <div>Claim or buy a Note</div>
             </div>
             <div className="flex justify-between mt-[32px] w-full">
               <div className="w-full flex gap-4">
@@ -104,7 +107,7 @@ export function EarnKeroseneContent() {
         <NoteCardsContainer>
           <div className="text-sm font-semibold text-[#A1A1AA]">
             <div className="flex w-full flex justify-between items-center">
-              <div className="text-2xl text-[#FAFAFA]  ">Step 2</div>
+              <div className="text-2xl text-[#FAFAFA]">Step 2</div>
               <div>Deposit collateral and mint DYAD</div>
             </div>
             <div className="flex justify-between mt-[32px] w-full">
@@ -123,7 +126,7 @@ export function EarnKeroseneContent() {
         <NoteCardsContainer>
           <div className="text-sm font-semibold text-[#A1A1AA]">
             <div className="flex w-full flex justify-between items-center">
-              <div className="text-2xl text-[#FAFAFA]  ">Step 3</div>
+              <div className="text-2xl text-[#FAFAFA]">Step 3</div>
               <div>Provide liquidity to USDC - DYAD on Uniswap v3</div>
             </div>
             <div className="flex justify-between mt-[32px] w-full">
@@ -144,7 +147,7 @@ export function EarnKeroseneContent() {
         <NoteCardsContainer>
           <div className="text-sm font-semibold text-[#A1A1AA]">
             <div className="flex w-full flex justify-between items-center">
-              <div className="text-2xl text-[#FAFAFA]  ">Step 4</div>
+              <div className="text-2xl text-[#FAFAFA]">Step 4</div>
               <div>Claim rewards from Merkl</div>
             </div>
 
@@ -166,7 +169,13 @@ export function EarnKeroseneContent() {
                     {loading ? (
                       <p>Loading...</p>
                     ) : error ? (
-                      <p className="col-span-3">{error}</p>
+                      <p className="col-span-3">
+                        {error.message || "An error occurred"}
+                      </p>
+                    ) : kerosenePriceError ? (
+                      <p className="col-span-3">
+                        {kerosenePriceError.message || "Failed to load price"}
+                      </p>
                     ) : (
                       <>
                         <p>Your total earnings</p>
@@ -176,7 +185,7 @@ export function EarnKeroseneContent() {
                           ).toLocaleString()}{" "}
                           KEROSENE
                         </p>
-                        <p>{totalUsd && `$${totalUsd}`}</p>
+                        <p>{`$${totalUsd}`}</p>
                         <p>Total claimable</p>
                         <p>
                           {Number(
@@ -184,12 +193,12 @@ export function EarnKeroseneContent() {
                           ).toLocaleString()}{" "}
                           KEROSENE
                         </p>
-                        <p>{claimableUsd && `$${claimableUsd}`}</p>
+                        <p>{`$${claimableUsd}`}</p>
                       </>
                     )}
                   </div>
                   {merklRewards &&
-                    claimMerklRewardsConfig != undefined &&
+                    claimMerklRewardsConfig !== undefined &&
                     claimError === null && (
                       <div className="w-full flex gap-4">
                         <ButtonComponent
