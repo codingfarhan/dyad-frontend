@@ -42,6 +42,9 @@ const TableComponent: React.FC<TableComponentProps> = ({
         const aValue = parseValue(getKeyValue(a, sortConfig.key));
         const bValue = parseValue(getKeyValue(b, sortConfig.key));
 
+        if (!aValue) return 1;
+        if (!bValue) return -1;
+
         if (aValue > bValue) {
           return sortConfig.direction === "ascending" ? -1 : 1;
         }

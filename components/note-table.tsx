@@ -150,8 +150,7 @@ const NoteTable: React.FC<any> = ({}) => {
       }
 
       return {
-        priceNormalized:
-          cheapestListing?.price?.amount?.usd || Number.MAX_SAFE_INTEGER,
+        priceNormalized: cheapestListing?.price?.amount?.usd,
         market: component,
       };
     },
