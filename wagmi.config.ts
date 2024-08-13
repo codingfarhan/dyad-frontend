@@ -119,6 +119,14 @@ export default defineConfig({
       abi: vaultAbi,
     },
     {
+      name: "sUSDeVault",
+      address: {
+        [mainnet.id]: "0x3FC5c0e19b6287f25EB271c2E8e7Ba898FE7ab29",
+        [anvil.id]: "0x3FC5c0e19b6287f25EB271c2E8e7Ba898FE7ab29",
+      },
+      abi: vaultAbi,
+    },
+    {
       name: "Payments",
       address: {
         // [sepolia.id]: "0xe9F9Df2De303802f81EB114a5F24a3d4A17089f4",
@@ -201,6 +209,14 @@ export default defineConfig({
       address: {
         [mainnet.id]: "0x18084fbA666a33d37592fA2633fD49a74DD93a88",
         [anvil.id]: "0x18084fbA666a33d37592fA2633fD49a74DD93a88",
+      },
+      abi: erc20Abi,
+    },
+    {
+      name: "sUSDe",
+      address: {
+        [mainnet.id]: "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497",
+        [anvil.id]: "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497",
       },
       abi: erc20Abi,
     },
