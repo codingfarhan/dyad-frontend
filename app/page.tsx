@@ -3,18 +3,15 @@
 import ButtonComponent from "@/components/reusable/ButtonComponent";
 import KeroseneCard from "@/components/KeroseneCard/KeroseneCard";
 import NoteCard from "@/components/NoteCard/NoteCard";
-
-import SortbyComponent from "@/components/reusable/SortbyComponent";
-import { SORT_BY_OPTIONS } from "@/mockData/tabsMockData";
-import { useState } from "react";
+import { EarnKeroseneContent } from "@/components/earn-kerosene";
 import { ClaimModalContent } from "@/components/claim-modal-content";
-import { useQuery } from "@tanstack/react-query";
-import { alchemySdk } from "@/lib/alchemy";
 import { useAccount } from "wagmi";
-import { dNftAddress } from "@/generated";
+import { useReadDNftBalanceOf } from "@/generated";
 import { defaultChain } from "@/lib/config";
-import { SnapshotClaim } from "@/components/NoteCard/Children/SnapshotClaim";
+import useIDsByOwner from "@/hooks/useIDsByOwner";
 import dynamic from "next/dynamic";
+import NoteTable from "@/components/note-table";
+import { BuyNoteWithKerosene } from "@/components/buy-note-kerosene";
 
 const TabsComponent = dynamic(
   () => import("@/components/reusable/TabsComponent"),
@@ -22,17 +19,14 @@ const TabsComponent = dynamic(
 );
 
 export default function Home() {
-  const [selectedValue, setSelectedValue] = useState("");
   const { address } = useAccount();
-  const { data: notes } = useQuery({
-    queryKey: ["notes", address],
-    queryFn: () =>
-      alchemySdk.nft
-        .getNftsForOwner(address as string, {
-          contractAddresses: [dNftAddress[defaultChain.id]],
-        })
-        .then((res) => res.ownedNfts.map((nft) => nft.tokenId)),
+
+  const { data: balance } = useReadDNftBalanceOf({
+    args: [address],
+    chainId: defaultChain.id,
   });
+
+  const { tokens } = useIDsByOwner(address, balance);
 
   const keroseneCardsData = [
     {
@@ -50,19 +44,18 @@ export default function Home() {
   ];
   const manageNotesContent = (
     <>
-      <div className="mt-12 mb-6 flex justify-between">
+      <BuyNoteWithKerosene />
+      <div className="my-6 flex justify-between">
         <ClaimModalContent />
-        {/* <div>
-          <SortbyComponent
-            sortOptions={SORT_BY_OPTIONS}
-            selected={selectedValue}
-            onValueChange={setSelectedValue}
-          />
-        </div> */}
       </div>
       <div className="flex flex-col gap-4">
-        {notes &&
-          notes.map((tokenId) => <NoteCard key={tokenId} tokenId={tokenId} />)}
+        {tokens &&
+          tokens.map((token) => (
+            <NoteCard
+              key={parseInt(token.result)}
+              tokenId={parseInt(token.result)}
+            />
+          ))}
       </div>
     </>
   );
@@ -87,25 +80,25 @@ export default function Home() {
 
   const tabsData = [
     {
+      label: "Earn Kerosene",
+      tabKey: "earn-kerosene",
+      content: <EarnKeroseneContent />,
+    },
+    {
       label: "Manage Notes",
       tabKey: "notes",
       content: manageNotesContent,
     },
     {
-      label: "Earn Kerosene",
-      tabKey: "earn-kerosene",
-      content: <p>Coming Soon</p>,
-    },
-    {
-      label: "Check Eligibility",
-      tabKey: "airdrop",
-      content: <SnapshotClaim />,
+      label: "Marketplace",
+      tabKey: "marketplace",
+      content: <NoteTable />,
     },
   ];
 
   return (
-    <div className="flex-1 max-w-screen-md w-[745px] p-4 mt-4">
-      <TabsComponent tabsData={tabsData} urlUpdate/>
+    <div className="flex-1 max-w-screen-md w-full p-4 mt-4">
+      <TabsComponent tabsData={tabsData} urlUpdate />
     </div>
   );
 }

@@ -1,16 +1,17 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import NoteCardsContainer from "../reusable/NoteCardsContainer";
 import TabsComponent from "../reusable/TabsComponent";
 import {
   useReadDyadMintedDyad,
   useReadVaultManagerCollatRatio,
-  useReadVaultManagerGetTotalUsdValue,
-  useReadVaultManagerMinCollaterizationRatio,
+  useReadVaultManagerGetTotalValue,
+  useReadVaultManagerMinCollatRatio,
   vaultManagerAbi,
   vaultManagerAddress,
   wEthVaultAbi,
+  useReadVaultManagerGetVaultsValues,
 } from "@/generated";
 import { defaultChain } from "@/lib/config";
 import NoteNumber from "./Children/NoteNumber";
@@ -24,22 +25,34 @@ import { formatNumber, fromBigNumber } from "@/lib/utils";
 import { vaultInfo } from "@/lib/constants";
 
 function NoteCard({ tokenId }: { tokenId: string }) {
-  const { data: collatRatio } = useReadVaultManagerCollatRatio({
+  // Fetch collateralization ratio
+  const { data: collatRatio, isError: collatRatioError } =
+    useReadVaultManagerCollatRatio({
+      args: [BigInt(tokenId)],
+      chainId: defaultChain.id,
+    });
+
+  // Fetch exogenous collateral value
+  const { data: exoCollat, isError: exoCollatError } =
+    useReadVaultManagerGetVaultsValues({
+      args: [BigInt(tokenId)],
+    });
+
+  // Fetch minted DYAD
+  const { data: mintedDyad, isError: mintedDyadError } = useReadDyadMintedDyad({
     args: [BigInt(tokenId)],
     chainId: defaultChain.id,
   });
 
-  const { data: mintedDyad } = useReadDyadMintedDyad({
-    args: [vaultManagerAddress[defaultChain.id], BigInt(tokenId)],
-    chainId: defaultChain.id,
-  });
+  // Fetch collateral value
+  const { data: collateralValue, isError: collateralValueError } =
+    useReadVaultManagerGetTotalValue({
+      args: [BigInt(tokenId)],
+      chainId: defaultChain.id,
+    });
 
-  const { data: collateralValue } = useReadVaultManagerGetTotalUsdValue({
-    args: [BigInt(tokenId)],
-    chainId: defaultChain.id,
-  });
-
-  const { data: hasVaultData } = useReadContracts({
+  // Check if the vault exists
+  const { data: hasVaultData, isError: hasVaultError } = useReadContracts({
     contracts: supportedVaults.map((address) => ({
       address: vaultManagerAddress[defaultChain.id],
       abi: vaultManagerAbi,
@@ -51,34 +64,77 @@ function NoteCard({ tokenId }: { tokenId: string }) {
   });
   const hasVault = (hasVaultData?.filter((data) => !!data)?.length || 0) > 0;
 
-  const { data: vaultCollateral } = useReadContracts({
-    contracts: supportedVaults.map((address) => ({
-      address: address,
-      abi: wEthVaultAbi,
-      functionName: "getUsdValue",
-      args: [BigInt(tokenId)],
-      chainId: defaultChain.id,
-    })),
-    allowFailure: false,
+  // Fetch vault collateral values
+  const { data: vaultCollateral, isError: vaultCollateralError } =
+    useReadContracts({
+      contracts: supportedVaults.map((address) => ({
+        address: address,
+        abi: wEthVaultAbi,
+        functionName: "getUsdValue",
+        args: [BigInt(tokenId)],
+        chainId: defaultChain.id,
+      })),
+      allowFailure: false,
+    });
+
+  // Calculate vault USD values
+  const vaultUsd = vaultCollateral
+    ?.map((value, i) => ({
+      value: fromBigNumber(value),
+      label: vaultInfo[i].symbol,
+    }))
+    .filter((data) => !!data.value);
+
+  // Fetch minimum collateralization ratio
+  const {
+    data: minCollateralizationRatio,
+    isError: minCollateralizationRatioError,
+  } = useReadVaultManagerMinCollatRatio({
+    chainId: defaultChain.id,
   });
 
-  const vaultUsd = vaultCollateral?.map((value, i) => ({
-    value: fromBigNumber(value),
-    label: vaultInfo[i].symbol,
-  })).filter((data) => !!data.value);
-
-  const { data: minCollateralizationRatio } =
-    useReadVaultManagerMinCollaterizationRatio({ chainId: defaultChain.id });
-
-  const totalCollateral = `$${formatNumber(fromBigNumber(collateralValue))}`;
+  // Calculate total collateral and collateralization ratio
+  const totalCollateral =
+    collateralValueError || !collateralValue
+      ? "N/A"
+      : `$${formatNumber(fromBigNumber(collateralValue))}`;
   const collateralizationRatio =
-    collatRatio === maxUint256
-      ? "Infinity"
-      : `${formatNumber(fromBigNumber(collatRatio, 16))}%`;
-  const totalDyad = `${fromBigNumber(mintedDyad)}`;
+    collatRatioError || !collatRatio
+      ? "N/A"
+      : collatRatio === maxUint256
+        ? "Infinity"
+        : `${formatNumber(fromBigNumber(collatRatio, 16))}%`;
 
-  const maxDyad = (collateralValue || 0n) / (minCollateralizationRatio || 1n);
+  // Calculate total DYAD
+  const totalDyad =
+    mintedDyadError || !mintedDyad ? "N/A" : `${fromBigNumber(mintedDyad)}`;
 
+  // Calculate mintable DYAD
+  const mintableDyad = useMemo(() => {
+    if (
+      collateralValueError ||
+      minCollateralizationRatioError ||
+      mintedDyadError ||
+      !collateralValue ||
+      !minCollateralizationRatio ||
+      !mintedDyad
+    ) {
+      return "N/A";
+    }
+    const maxDyad =
+      ((collateralValue || 0n) * 1000000000000000000n) /
+      (minCollateralizationRatio || 1n);
+    return maxDyad - (mintedDyad || 0n);
+  }, [
+    collateralValue,
+    minCollateralizationRatio,
+    mintedDyad,
+    collateralValueError,
+    minCollateralizationRatioError,
+    mintedDyadError,
+  ]);
+
+  // Prepare data for the note
   const noteData: NoteNumberDataColumnModel[] = [
     {
       text: "Collateralization ratio",
@@ -95,8 +151,17 @@ function NoteCard({ tokenId }: { tokenId: string }) {
       value: totalCollateral,
       highlighted: false,
     },
+    {
+      text: "Exogenous Collateral",
+      value:
+        exoCollatError || !exoCollat
+          ? "N/A"
+          : `$${formatNumber(fromBigNumber(exoCollat[0]))}`,
+      highlighted: false,
+    },
   ];
 
+  // Prepare tabs data
   const tabData: TabsDataModel[] = [
     {
       label: `Note Nº ${tokenId}`,
@@ -104,10 +169,7 @@ function NoteCard({ tokenId }: { tokenId: string }) {
       content: hasVault ? (
         <NoteNumber
           data={noteData}
-          dyad={[
-            parseFloat(maxDyad.toString()) - fromBigNumber(mintedDyad),
-            fromBigNumber(mintedDyad),
-          ]}
+          dyad={[fromBigNumber(mintableDyad), fromBigNumber(mintedDyad)]}
           collateral={vaultUsd as any}
         />
       ) : (

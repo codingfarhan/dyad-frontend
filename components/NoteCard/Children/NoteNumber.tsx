@@ -6,7 +6,9 @@ import {
   PIE_CHART_MOCK_DATA,
   PIE_CHART_OPTIONS,
 } from "@/mockData/tabsMockData";
-import PieChartComponent, { Data } from "@/components/reusable/PieChartComponent";
+import PieChartComponent, {
+  Data,
+} from "@/components/reusable/PieChartComponent";
 
 interface NoteNumberProps {
   data: NoteNumberDataColumnModel[];

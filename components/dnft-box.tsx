@@ -14,6 +14,7 @@ import {
   SelectValue,
   SelectContent,
 } from "@/components/ui/select";
+import ButtonComponent from "@/components/reusable/ButtonComponent";
 import { Button } from "@/components/ui/button";
 import MintAndDepositTab from "@/components/mint-and-deposit-tab";
 import BurnAndWithdrawTab from "@/components/burn-and-withdraw-tab";
@@ -85,7 +86,7 @@ export default function DnftBox() {
       {
         address: vaultManager,
         abi: VaultManagerAbi["abi"],
-        functionName: "getTotalUsdValue",
+        functionName: "getTotalValue",
         args: [selectedDnft ?? "0"],
       },
       {

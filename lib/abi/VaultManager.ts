@@ -125,7 +125,7 @@ export const vaultManagerAbi = [
   },
   {
     inputs: [],
-    name: "MIN_COLLATERIZATION_RATIO",
+    name: "MIN_COLLAT_RATIO",
     outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "view",
     type: "function",
@@ -184,8 +184,18 @@ export const vaultManagerAbi = [
   },
   {
     inputs: [{ internalType: "uint256", name: "id", type: "uint256" }],
-    name: "getTotalUsdValue",
+    name: "getTotalValue",
     outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "uint256", name: "id", type: "uint256" }],
+    name: "getVaultsValues",
+    outputs: [
+      { internalType: "uint256", name: "", type: "uint256" },
+      { internalType: "uint256", name: "", type: "uint256" },
+    ],
     stateMutability: "view",
     type: "function",
   },

@@ -7,7 +7,7 @@ import {
   getKeyValue,
   Table,
 } from "@nextui-org/react";
-import React from "react";
+import React, { useState } from "react";
 
 interface TableComponentProps {
   columns: any;
@@ -22,6 +22,54 @@ const TableComponent: React.FC<TableComponentProps> = ({
   onRowClick,
   size = "default",
 }) => {
+  const [sortConfig, setSortConfig] = useState<{
+    key: string;
+    direction: string;
+  } | null>(null);
+
+  const parseValue = (value: string) => {
+    if (value === undefined || value === "") return 0;
+    value = String(value);
+    // Remove any non-numeric characters except for '.' and '-'
+    const numericValue = value.replace(/[^\d.-]/g, "");
+    return parseFloat(numericValue);
+  };
+
+  const sortedRows = React.useMemo(() => {
+    let sortableRows = [...rows];
+    if (sortConfig !== null) {
+      sortableRows.sort((a, b) => {
+        const aValue = parseValue(getKeyValue(a, sortConfig.key));
+        const bValue = parseValue(getKeyValue(b, sortConfig.key));
+
+        if (!aValue) return 1;
+        if (!bValue) return -1;
+
+        if (aValue > bValue) {
+          return sortConfig.direction === "ascending" ? -1 : 1;
+        }
+        if (aValue < bValue) {
+          return sortConfig.direction === "ascending" ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return sortableRows;
+  }, [rows, sortConfig]);
+
+  const requestSort = (key: string) => {
+    setSortConfig((oldValue) => {
+      let direction = "ascending";
+      if (
+        oldValue 
+        && oldValue.key === key 
+        && oldValue.direction === "ascending") {
+        direction = "descending";
+      }
+      return { key, direction };
+    })
+  };
+
   return (
     <div className="h-full overflow-scroll">
       <Table
@@ -30,19 +78,25 @@ const TableComponent: React.FC<TableComponentProps> = ({
         shadow="none"
         classNames={{
           th: " table-header ",
-          tbody: "px-0 h-full ",
+          tbody: "px-2 h-full ",
           tr: `${onRowClick ? "cursor-pointer hover:text-[#a1a1aa]" : ""} ${
             size === "compact" ? "h-[35px]" : "h-[50px]"
           } table-row `,
-          td: "px-0 pr-[8px]",
+          td: "px-0 pl-2",
         }}
       >
         <TableHeader columns={columns}>
           {(column: any) => (
-            <TableColumn key={column.key}>{column.label}</TableColumn>
+            <TableColumn
+              key={column.key}
+              onClick={() => requestSort(column.sortKey || column.key)}
+              style={{ cursor: "pointer" }}
+            >
+              {column.label}
+            </TableColumn>
           )}
         </TableHeader>
-        <TableBody items={rows}>
+        <TableBody items={sortedRows}>
           {(item: any) => (
             <TableRow
               key={item.key}

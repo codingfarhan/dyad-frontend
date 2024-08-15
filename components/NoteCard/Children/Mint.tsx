@@ -5,10 +5,12 @@ import ButtonComponent from "@/components/reusable/ButtonComponent";
 import { BigIntInput } from "@/components/reusable/BigIntInput";
 import { useTransactionStore } from "@/lib/store";
 import {
+  useReadDyadBalanceOf,
   useReadDyadMintedDyad,
-  useReadVaultManagerGetTotalUsdValue,
-  useReadVaultManagerMinCollaterizationRatio,
+  useReadVaultManagerGetTotalValue,
+  useReadVaultManagerMinCollatRatio,
   vaultManagerAbi,
+  useReadVaultManagerGetVaultsValues,
   vaultManagerAddress,
 } from "@/generated";
 import { defaultChain } from "@/lib/config";
@@ -27,18 +29,33 @@ const Mint: React.FC<MintProps> = ({ dyadMinted, currentCr, tokenId }) => {
   const [burnInputValue, setBurnInputValue] = useState("");
   const { setTransactionData } = useTransactionStore();
 
-  const { data: mintedDyad } = useReadDyadMintedDyad({
-    args: [vaultManagerAddress[defaultChain.id], BigInt(tokenId)],
-    chainId: defaultChain.id,
+  const { address } = useAccount();
+
+  const { data: exoCollat } = useReadVaultManagerGetVaultsValues({
+    args: [BigInt(tokenId)],
   });
 
-  const { data: collateralValue } = useReadVaultManagerGetTotalUsdValue({
+  const { data: mintedDyad } = useReadDyadMintedDyad({
     args: [BigInt(tokenId)],
     chainId: defaultChain.id,
   });
 
-  const { data: minCollateralizationRatio } =
-    useReadVaultManagerMinCollaterizationRatio({ chainId: defaultChain.id });
+  const { data: dyadBalance } = useReadDyadBalanceOf({
+    args: [address!],
+    chainId: defaultChain.id,
+    query: {
+      enabled: !!address,
+    },
+  });
+
+  const { data: collateralValue } = useReadVaultManagerGetTotalValue({
+    args: [BigInt(tokenId)],
+    chainId: defaultChain.id,
+  });
+
+  const { data: minCollateralizationRatio } = useReadVaultManagerMinCollatRatio(
+    { chainId: defaultChain.id }
+  );
 
   const newCr =
     (mintedDyad || 0n) +
@@ -50,23 +67,44 @@ const Mint: React.FC<MintProps> = ({ dyadMinted, currentCr, tokenId }) => {
           (BigInt(mintInputValue) || 0n) -
           (BigInt(burnInputValue) || 0n))
       : 0n;
-  const { address } = useAccount();
 
   const onMaxMintHandler = () => {
-    setMintInputValue(
-      toBigNumber(
-        Math.round(
-          (fromBigNumber(collateralValue) -
-            fromBigNumber(minCollateralizationRatio) *
-              fromBigNumber(mintedDyad)) /
-            fromBigNumber(minCollateralizationRatio)
-        )
-      ).toString()
+    const collateral = fromBigNumber(collateralValue);
+    const minCollatRatio = fromBigNumber(minCollateralizationRatio);
+    const mintedDyadAmount = fromBigNumber(mintedDyad);
+
+    // Calculate mintable DYAD from Collateral Ratio (CR)
+    const mintableDyadFromCR = toBigNumber(
+      Math.round(
+        (collateral - minCollatRatio * mintedDyadAmount) / minCollatRatio
+      )
     );
+
+    // Get exogenous collateral if available, else set to 0
+    const exoCollatValue = exoCollat ? fromBigNumber(exoCollat[0]) : 0n;
+
+    // Calculate mintable DYAD from exogenous collateral
+    const mintableDyadFromExoCollat = exoCollatValue - mintedDyadAmount;
+
+    if (mintableDyadFromExoCollat < 0) {
+      setMintInputValue("0");
+      return;
+    }
+
+    // Set the mint input value to the smaller of the two calculated values
+    const mintableDyad =
+      mintableDyadFromExoCollat > mintableDyadFromCR
+        ? mintableDyadFromCR
+        : toBigNumber(Math.round(mintableDyadFromExoCollat));
+
+    setMintInputValue(mintableDyad.toString());
   };
 
   const onMaxBurnHandler = () => {
-    setBurnInputValue(mintedDyad?.toString() || "0");
+    const minted = mintedDyad || 0n;
+    const balance = dyadBalance || 0n;
+    const min = minted < balance ? minted : balance;
+    setBurnInputValue(min.toString());
   };
 
   if (collateralValue === 0n && !collateralValue) {
@@ -146,6 +184,12 @@ const Mint: React.FC<MintProps> = ({ dyadMinted, currentCr, tokenId }) => {
           <div className="mr-[5px]">DYAD minted:</div>
           <div>{dyadMinted}</div>
         </div>
+        {exoCollat && (
+          <div className="flex">
+            <div className="mr-[5px]">Exogenous Collateral:</div>
+            <div>${formatNumber(fromBigNumber(exoCollat[0], 18))}</div>
+          </div>
+        )}
         <div className="flex">
           <div className="mr-[5px]">Current CR:</div>
           <p>

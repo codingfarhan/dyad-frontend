@@ -1,18 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import ButtonComponent from "@/components/reusable/ButtonComponent";
 import { DialogClose } from "@/components/ui/dialog";
 import { BigIntInput } from "@/components/reusable/BigIntInput";
 import { formatNumber, fromBigNumber, toBigNumber } from "@/lib/utils";
 import { Address, erc20Abi, maxUint256 } from "viem";
-import { useAccount, useReadContract } from "wagmi";
+import { useAccount, useReadContracts } from "wagmi";
 import { useTransactionStore } from "@/lib/store";
 import {
-  useReadDyadMintedDyad,
-  useReadVaultManagerMinCollaterizationRatio,
+  dyadAbi,
+  dyadAddress,
+  useReadXpBalanceOfNote,
+  useReadXpTotalSupply,
   vaultManagerAbi,
   vaultManagerAddress,
+  keroseneVaultV2Address,
   wEthVaultAbi,
 } from "@/generated";
 import { defaultChain } from "@/lib/config";
@@ -38,68 +41,113 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
   const { address } = useAccount();
   const { setTransactionData } = useTransactionStore();
 
-  const { data: mintedDyad } = useReadDyadMintedDyad({
-    args: [vaultManagerAddress[defaultChain.id], BigInt(tokenId)],
-    chainId: defaultChain.id,
-  });
-
-  const { data: collateralValue } = useReadContract({
-    address: vaultAddress,
-    abi: wEthVaultAbi,
-    functionName: "getUsdValue",
+  const { data: xpBalanceOfNote } = useReadXpBalanceOfNote({
     args: [BigInt(tokenId)],
-    chainId: defaultChain.id,
   });
 
-  const { data: assetValue } = useReadContract({
-    address: vaultAddress,
-    abi: wEthVaultAbi,
-    functionName: "assetPrice",
-    chainId: defaultChain.id,
-  });
+  const { data: xpTotalSupply } = useReadXpTotalSupply();
 
-  const { data: allowance } = useReadContract({
-    address: token,
-    abi: erc20Abi,
-    functionName: "allowance",
-    args: [address!, vaultManagerAddress[defaultChain.id]],
-    chainId: defaultChain.id,
+  const { data: contractData } = useReadContracts({
+    allowFailure: false,
+    contracts: [
+      {
+        address: dyadAddress[defaultChain.id],
+        abi: dyadAbi,
+        functionName: "mintedDyad",
+        args: [BigInt(tokenId)],
+        chainId: defaultChain.id,
+      },
+      {
+        address: vaultManagerAddress[defaultChain.id],
+        abi: vaultManagerAbi,
+        functionName: "getTotalValue",
+        args: [BigInt(tokenId)],
+        chainId: defaultChain.id,
+      },
+      {
+        address: vaultAddress,
+        abi: wEthVaultAbi,
+        functionName: "id2asset",
+        args: [BigInt(tokenId)],
+        chainId: defaultChain.id,
+      },
+      {
+        address: vaultAddress,
+        abi: wEthVaultAbi,
+        functionName: "assetPrice",
+        chainId: defaultChain.id,
+      },
+      {
+        address: token,
+        abi: erc20Abi,
+        functionName: "allowance",
+        args: [address!, vaultManagerAddress[defaultChain.id]],
+        chainId: defaultChain.id,
+      },
+      {
+        address: vaultManagerAddress[defaultChain.id],
+        abi: vaultManagerAbi,
+        functionName: "MIN_COLLAT_RATIO",
+        chainId: defaultChain.id,
+      },
+      {
+        address: token,
+        abi: erc20Abi,
+        functionName: "balanceOf",
+        args: [address!],
+      },
+    ],
+    query: {
+      select: (data) => ({
+        mintedDyad: data[0],
+        collateralValue: data[1],
+        totalDeposited: data[2],
+        assetValue: data[3],
+        allowance: data[4],
+        minCollateralizationRatio: data[5],
+        balance: data[6],
+      }),
+    },
   });
-
-  const { data: minCollateralizationRatio } =
-    useReadVaultManagerMinCollaterizationRatio({ chainId: defaultChain.id });
 
   const newCr =
-    ((fromBigNumber(collateralValue) +
+    ((fromBigNumber(contractData?.collateralValue) +
       (action === "deposit"
-        ? fromBigNumber(inputValue) * fromBigNumber(assetValue, 8)
-        : -fromBigNumber(inputValue) * fromBigNumber(assetValue, 8))) /
-      fromBigNumber(mintedDyad)) *
+        ? fromBigNumber(inputValue) * fromBigNumber(contractData?.assetValue, 8)
+        : -fromBigNumber(inputValue) *
+          fromBigNumber(contractData?.assetValue, 8))) /
+      fromBigNumber(contractData?.mintedDyad)) *
     100;
 
-  const { data: balance } = useReadContract({
-    address: token,
-    abi: erc20Abi,
-    functionName: "balanceOf",
-    args: [address!],
-  });
+  const theoreticalMaxWithdraw = useMemo(() => {
+    const totalAssetDeposited = fromBigNumber(contractData?.totalDeposited);
+    const price = fromBigNumber(contractData?.assetValue, 8);
+
+    const totalCollateral = fromBigNumber(contractData?.collateralValue);
+    const totalDyad = fromBigNumber(contractData?.mintedDyad);
+    const minCollateralRatio = fromBigNumber(
+      contractData?.minCollateralizationRatio
+    );
+
+    const maxWithdraw =
+      (totalCollateral - totalDyad * minCollateralRatio) / price - 0.000001;
+
+    if (maxWithdraw < totalAssetDeposited) {
+      return toBigNumber(maxWithdraw);
+    }
+    return contractData?.totalDeposited;
+  }, [contractData]);
 
   const maxHandler = () => {
     if (action === "deposit") {
-      setInputValue(balance?.toString() || "0");
+      setInputValue(contractData?.balance?.toString() || "0");
     }
     if (action === "withdraw") {
-      const theoreticalMax = toBigNumber(
-        (fromBigNumber(collateralValue) -
-          fromBigNumber(mintedDyad) *
-            fromBigNumber(minCollateralizationRatio)) /
-          fromBigNumber(assetValue, 8)
-      );
-      setInputValue((theoreticalMax - toBigNumber(0.000001)).toString());
+      setInputValue(theoreticalMaxWithdraw?.toString() || "0");
     }
 
     if (action === "redeem") {
-      setInputValue((mintedDyad || 0n).toString());
+      setInputValue((contractData?.mintedDyad || 0n).toString());
     }
   };
 
@@ -119,21 +167,58 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
           </ButtonComponent>
         </div>
       </div>
-      {mintedDyad !== 0n && !!mintedDyad && action !== "redeem" && (
-        <div className="flex flex-col w-full justify-between font-semibold text-sm">
-          <div className="flex text-[#A1A1AA]">
-            <div className="mr-[5px]">Current collateralization ratio:</div>
-            <p>{formatNumber(fromBigNumber(collateralizationRatio, 16))}%</p>
+      {contractData?.mintedDyad !== 0n &&
+        !!contractData?.mintedDyad &&
+        action !== "redeem" && (
+          <div className="flex flex-col w-full justify-between font-semibold text-sm">
+            <div className="flex text-[#A1A1AA]">
+              <div className="mr-[5px]">Current collateralization ratio:</div>
+              <p>{formatNumber(fromBigNumber(collateralizationRatio, 16))}%</p>
+            </div>
+            <div className="flex">
+              <div className="mr-[5px] ">New collateralization ratio:</div>
+              <div>{formatNumber(newCr)}%</div>
+            </div>
           </div>
-          <div className="flex">
-            <div className="mr-[5px] ">New collateralization ratio:</div>
-            <div>{formatNumber(newCr)}%</div>
-          </div>
+        )}
+      {vaultAddress === keroseneVaultV2Address[defaultChain.id] && (
+        <div>
+          {xpBalanceOfNote !== undefined && xpTotalSupply !== undefined && (
+            <div className="flex justify-between text-sm gap-4">
+              <div className="flex gap-2 text-[#A1A1AA]">
+                <div>XP: </div>
+                <div>
+                  {(parseFloat(xpBalanceOfNote) / 1e18 / 1e9).toFixed(0)}
+                </div>
+              </div>
+              <div className="flex gap-2 text-[#A1A1AA]">
+                <div>Accrual Rate: </div>
+                <div>
+                  {((0.000000001 * parseFloat(xpBalanceOfNote)) / 1e18).toFixed(
+                    2
+                  )}{" "}
+                  / sec
+                </div>
+              </div>
+              <div className="flex gap-2 text-[#A1A1AA]">
+                <div>XP Share: </div>
+                <div>
+                  {(
+                    (parseFloat(xpBalanceOfNote) /
+                      1e18 /
+                      (parseFloat(xpTotalSupply) / 1e18)) *
+                    100
+                  ).toFixed(4) + "%"}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
-
       <div className="flex gap-8">
-        {allowance === 0n && action === "deposit" ? (
+        {contractData?.allowance !== undefined &&
+        contractData?.allowance < toBigNumber(inputValue, 0) &&
+        action === "deposit" ? (
           <div className="w-[100px]">
             <ButtonComponent
               onClick={() =>

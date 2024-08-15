@@ -1,4 +1,4 @@
-export const dyadAbi = [
+export const dyadXpAbi = [
   {
     inputs: [
       { internalType: "contract Licenser", name: "_licenser", type: "address" },
@@ -83,6 +83,13 @@ export const dyadAbi = [
     type: "function",
   },
   {
+    inputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    name: "balanceOfNote",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [
       { internalType: "uint256", name: "id", type: "uint256" },
       { internalType: "address", name: "from", type: "address" },
@@ -119,9 +126,7 @@ export const dyadAbi = [
     type: "function",
   },
   {
-    inputs: [
-      { internalType: "uint256", name: "", type: "uint256" },
-    ],
+    inputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     name: "mintedDyad",
     outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "view",
