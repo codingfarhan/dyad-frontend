@@ -15,10 +15,8 @@ import {
   BuyModal,
   CancelListingModal,
   EditListingModal,
-  ListingData,
   ListModal,
   useListings,
-  useUserListings,
 } from "@reservoir0x/reservoir-kit-ui";
 import { maxUint256 } from "viem";
 import { web3Modal } from "@/lib/web3Modal";

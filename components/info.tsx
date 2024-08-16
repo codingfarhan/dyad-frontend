@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
@@ -7,7 +6,7 @@ import {
 } from "@/components/ui/tooltip";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
 
-export default function Info({ children }) {
+export default function Info({ children }: { children: React.ReactNode }) {
   return (
     <TooltipProvider>
       <Tooltip>
