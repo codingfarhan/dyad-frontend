@@ -192,7 +192,6 @@ function NoteCard({ tokenId }: { tokenId: string }) {
       tabKey: "Mint DYAD",
       content: (
         <Mint
-          dyadMinted={totalDyad}
           currentCr={collatRatio}
           tokenId={tokenId}
         />
