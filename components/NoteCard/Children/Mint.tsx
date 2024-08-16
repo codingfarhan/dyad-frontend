@@ -1,115 +1,148 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import ButtonComponent from "@/components/reusable/ButtonComponent";
 import { BigIntInput } from "@/components/reusable/BigIntInput";
 import { useTransactionStore } from "@/lib/store";
 import {
-  useReadDyadBalanceOf,
-  useReadDyadMintedDyad,
-  useReadVaultManagerGetTotalValue,
-  useReadVaultManagerMinCollatRatio,
   vaultManagerAbi,
-  useReadVaultManagerGetVaultsValues,
   vaultManagerAddress,
+  dyadAbi,
+  dyadAddress,
 } from "@/generated";
 import { defaultChain } from "@/lib/config";
-import { useAccount } from "wagmi";
+import { useAccount, useReadContracts } from "wagmi";
 import { formatNumber, fromBigNumber, toBigNumber } from "@/lib/utils";
 import { maxUint256 } from "viem";
 
 interface MintProps {
   tokenId: string;
-  dyadMinted: string;
   currentCr: bigint | undefined;
 }
 
-const Mint: React.FC<MintProps> = ({ dyadMinted, currentCr, tokenId }) => {
+const Mint = ({ currentCr, tokenId }: MintProps) => {
   const [mintInputValue, setMintInputValue] = useState("");
   const [burnInputValue, setBurnInputValue] = useState("");
   const { setTransactionData } = useTransactionStore();
 
   const { address } = useAccount();
 
-  const { data: exoCollat } = useReadVaultManagerGetVaultsValues({
-    args: [BigInt(tokenId)],
-  });
-
-  const { data: mintedDyad } = useReadDyadMintedDyad({
-    args: [BigInt(tokenId)],
-    chainId: defaultChain.id,
-  });
-
-  const { data: dyadBalance } = useReadDyadBalanceOf({
-    args: [address!],
-    chainId: defaultChain.id,
+  const { data: contractData } = useReadContracts({
+    contracts: [
+      {
+        address: vaultManagerAddress[defaultChain.id],
+        abi: vaultManagerAbi,
+        functionName: "getVaultsValues",
+        args: [BigInt(tokenId)],
+      },
+      {
+        address: dyadAddress[defaultChain.id],
+        abi: dyadAbi,
+        functionName: "mintedDyad",
+        args: [BigInt(tokenId)],
+      },
+      {
+        address: dyadAddress[defaultChain.id],
+        abi: dyadAbi,
+        functionName: "balanceOf",
+        args: [address!],
+      },
+      {
+        address: vaultManagerAddress[defaultChain.id],
+        abi: vaultManagerAbi,
+        functionName: "MIN_COLLAT_RATIO",
+        args: [],
+      },
+    ],
+    allowFailure: false,
     query: {
       enabled: !!address,
+      select: (data) => {
+        const exoCollat = data[0][0];
+        const keroCollat = data[0][1];
+        const mintedDyad = data[1];
+        const dyadBalance = data[2];
+        const minCollateralizationRatio = data[3];
+
+        let totalCollateral = exoCollat;
+        // dollar rule; kero collateral can't exceed exo collateral
+        if (keroCollat > exoCollat) {
+          totalCollateral += exoCollat;
+        } else {
+          totalCollateral += keroCollat;
+        }
+
+        return {
+          exoCollat,
+          keroCollat,
+          totalCollateral,
+          mintedDyad,
+          dyadBalance,
+          minCollateralizationRatio,
+        };
+      },
     },
   });
 
-  const { data: collateralValue } = useReadVaultManagerGetTotalValue({
-    args: [BigInt(tokenId)],
-    chainId: defaultChain.id,
-  });
+  const newCr = useMemo(() => {
 
-  const { data: minCollateralizationRatio } = useReadVaultManagerMinCollatRatio(
-    { chainId: defaultChain.id }
-  );
+    let burnAmount = fromBigNumber(burnInputValue);
+    let mintAmount = fromBigNumber(mintInputValue);
 
-  const newCr =
-    (mintedDyad || 0n) +
-      (BigInt(mintInputValue) || 0n) -
-      (BigInt(burnInputValue) || 0n) !==
-    0n
-      ? ((collateralValue || 0n) * 100n) /
-        ((mintedDyad || 0n) +
-          (BigInt(mintInputValue) || 0n) -
-          (BigInt(burnInputValue) || 0n))
-      : 0n;
+    if (isNaN(burnAmount)) burnAmount = 0;
+    if (isNaN(mintAmount)) mintAmount = 0
+    
+    const newMintedDyad = fromBigNumber(contractData?.mintedDyad) + mintAmount - burnAmount;
+    if (newMintedDyad < 0) return 0;
+
+    const collateral = fromBigNumber(contractData?.totalCollateral);
+    return collateral / newMintedDyad * 100;
+
+  }, [burnInputValue, mintInputValue, contractData]);
 
   const onMaxMintHandler = () => {
-    const collateral = fromBigNumber(collateralValue);
-    const minCollatRatio = fromBigNumber(minCollateralizationRatio);
-    const mintedDyadAmount = fromBigNumber(mintedDyad);
+    const collateral = fromBigNumber(contractData?.totalCollateral);
+    const minCollatRatio = fromBigNumber(
+      contractData?.minCollateralizationRatio
+    ) + 0.01;
+    const mintedDyadAmount = fromBigNumber(contractData?.mintedDyad);
 
-    // Calculate mintable DYAD from Collateral Ratio (CR)
-    const mintableDyadFromCR = toBigNumber(
-      Math.round(
-        (collateral - minCollatRatio * mintedDyadAmount) / minCollatRatio
-      )
-    );
+    // Calculate mintable DYAD from total eligible collateral
+    const mintableDyad = collateral / minCollatRatio - mintedDyadAmount;
 
-    // Get exogenous collateral if available, else set to 0
-    const exoCollatValue = exoCollat ? fromBigNumber(exoCollat[0]) : 0n;
-
-    // Calculate mintable DYAD from exogenous collateral
-    const mintableDyadFromExoCollat = exoCollatValue - mintedDyadAmount;
-
-    if (mintableDyadFromExoCollat < 0) {
+    if (mintableDyad < 0) {
       setMintInputValue("0");
       return;
     }
 
-    // Set the mint input value to the smaller of the two calculated values
-    const mintableDyad =
-      mintableDyadFromExoCollat > mintableDyadFromCR
-        ? mintableDyadFromCR
-        : toBigNumber(Math.round(mintableDyadFromExoCollat));
-
-    setMintInputValue(mintableDyad.toString());
+    setMintInputValue(toBigNumber(mintableDyad.toString(), 18).toString());
   };
 
   const onMaxBurnHandler = () => {
-    const minted = mintedDyad || 0n;
-    const balance = dyadBalance || 0n;
+    const minted = contractData?.mintedDyad || 0n;
+    const balance = contractData?.dyadBalance || 0n;
     const min = minted < balance ? minted : balance;
     setBurnInputValue(min.toString());
   };
 
-  if (collateralValue === 0n && !collateralValue) {
+  if (contractData?.exoCollat === 0n && !contractData?.exoCollat) {
     return <p>Deposit collateral to mint DYAD</p>;
   }
+
+  const StackedValue = ({
+    description,
+    value,
+  }: {
+    description: string;
+    value: string;
+  }) => {
+    return (
+      <div className="flex flex-col">
+        <div className="mr-[5px]">{description}:</div>
+        <div>{value}</div>
+      </div>
+    );
+  };
 
   return (
     <div className="text-sm font-semibold text-[#A1A1AA]">
@@ -136,7 +169,7 @@ const Mint: React.FC<MintProps> = ({ dyadMinted, currentCr, tokenId }) => {
                   functionName: "mintDyad",
                   args: [tokenId, mintInputValue, address],
                 },
-                description: `Mint ${fromBigNumber(mintInputValue)} DYAD increasing collateralization ratio to ~${newCr.toString()}%`,
+                description: `Mint ${fromBigNumber(mintInputValue)} DYAD decreasing collateralization ratio to ~${newCr.toString()}%`,
               });
               setMintInputValue("");
             }}
@@ -169,7 +202,7 @@ const Mint: React.FC<MintProps> = ({ dyadMinted, currentCr, tokenId }) => {
                   functionName: "burnDyad",
                   args: [tokenId, burnInputValue],
                 },
-                description: `Burn ${fromBigNumber(burnInputValue)} DYAD to reduce collateralization ratio to ~${newCr.toString()}%`,
+                description: `Burn ${fromBigNumber(burnInputValue)} DYAD to increase collateralization ratio to ~${newCr.toString()}%`,
               });
               setBurnInputValue("");
             }}
@@ -180,29 +213,36 @@ const Mint: React.FC<MintProps> = ({ dyadMinted, currentCr, tokenId }) => {
         </div>
       </div>
       <div className="flex justify-between mt-[32px]">
-        <div className="flex">
-          <div className="mr-[5px]">DYAD minted:</div>
-          <div>{dyadMinted}</div>
-        </div>
-        {exoCollat && (
-          <div className="flex">
-            <div className="mr-[5px]">Exogenous Collateral:</div>
-            <div>${formatNumber(fromBigNumber(exoCollat[0], 18))}</div>
-          </div>
-        )}
-        <div className="flex">
-          <div className="mr-[5px]">Current CR:</div>
-          <p>
-            {currentCr === maxUint256
+        <StackedValue
+          description="DYAD minted"
+          value={formatNumber(
+            fromBigNumber(contractData?.mintedDyad).toFixed(2)
+          )}
+        />
+        <StackedValue
+          description="Exo Collateral"
+          value={formatNumber(
+            fromBigNumber(contractData?.exoCollat).toFixed(2)
+          )}
+        />
+        <StackedValue
+          description="Kero Collateral"
+          value={formatNumber(fromBigNumber(contractData?.keroCollat))}
+        />
+        <StackedValue
+          description="Current CR"
+          value={
+            currentCr === maxUint256
               ? "Infinity"
-              : `${formatNumber(fromBigNumber(currentCr, 16))}%`}
-          </p>
-        </div>
+              : `${formatNumber(fromBigNumber(currentCr, 16))}%`
+          }
+        />
+
         {(mintInputValue || burnInputValue) && (
-          <div className="flex">
-            <div className="mr-[5px]">New CR:</div>
-            <div>{newCr === 0n ? "Infinity" : newCr.toString()}%</div>
-          </div>
+          <StackedValue
+            description="New CR"
+            value={newCr === 0 ? "Infinity" : `${formatNumber(newCr)}%`}
+          />
         )}
       </div>
     </div>
