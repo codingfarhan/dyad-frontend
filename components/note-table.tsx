@@ -15,13 +15,11 @@ import {
   BuyModal,
   CancelListingModal,
   EditListingModal,
-  ListingData,
   ListModal,
   useListings,
-  useUserListings,
 } from "@reservoir0x/reservoir-kit-ui";
 import { maxUint256 } from "viem";
-import { web3Modal } from "@/lib/web3Modal";
+import { useConnectModal } from "@rainbow-me/rainbowkit";
 
 const NoteTable: React.FC<any> = ({}) => {
   const listModalOpenState = useState(false);
@@ -165,6 +163,8 @@ const NoteTable: React.FC<any> = ({}) => {
     ]
   );
 
+  const { openConnectModal } = useConnectModal();
+
   const parsedData = useMemo(() => {
     const parseRows = (items: any) => {
       const ownedDnftSet = new Set(ownedDnfts?.map(Number) || []);
@@ -241,7 +241,7 @@ const NoteTable: React.FC<any> = ({}) => {
           mutateListings();
         }}
         onConnectWallet={async () => {
-          await web3Modal.open();
+          openConnectModal?.();
           buyModalOpenState[1](false);
         }}
       />

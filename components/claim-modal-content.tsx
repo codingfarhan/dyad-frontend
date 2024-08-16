@@ -12,9 +12,8 @@ import {
 import { defaultChain } from "@/lib/config";
 import { useTransactionStore } from "@/lib/store";
 import { BuyModal, useListings } from "@reservoir0x/reservoir-kit-ui";
-import { list } from "postcss";
 import { useMemo, useState } from "react";
-import { web3Modal } from "@/lib/web3Modal";
+import { useConnectModal } from "@rainbow-me/rainbowkit";
 
 export function ClaimModalContent() {
   const buyModalOpenState = useState(false);
@@ -46,6 +45,8 @@ export function ClaimModalContent() {
     sortDirection: "asc",
   });
 
+  const { connectModalOpen, openConnectModal } = useConnectModal();
+
   const bestListing = useMemo(() => {
     if (listings === undefined) return undefined;
 
@@ -68,7 +69,7 @@ export function ClaimModalContent() {
         }
         token={`${dNftAddress[defaultChain.id]}:${bestListing?.criteria?.data?.token?.tokenId}`}
         onConnectWallet={async () => {
-          await web3Modal.open();
+          openConnectModal?.();
           buyModalOpenState[1](false);
         }}
         openState={buyModalOpenState}

@@ -4,8 +4,8 @@ import VaultManagerAbi from "@/abis/VaultManager.json";
 import Loader from "@/components/loader";
 import { CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import WalletButton from "@/components/ui/wallet-button";
 import useModal from "@/contexts/modal";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 interface Props {
   dnft: string;
@@ -80,7 +80,7 @@ export function AddVaultModalContent({ dnft, vault, vaultManager }: Props) {
           )}
         </Button>
       ) : (
-        <WalletButton className="mt-2 w-full" />
+        <ConnectButton />
       )}
     </div>
   );

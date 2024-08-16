@@ -1,5 +1,5 @@
 'use client'
-
+import '@rainbow-me/rainbowkit/styles.css';
 import "./globals.css";
 import { Inter } from "next/font/google";
 
@@ -9,6 +9,7 @@ import { MainNav } from "@/components/ui/main-nav";
 import MobileNotSupported from "@/components/ui/MobileNotSupported";
 import { Providers } from "./providers";
 import { TransactionModal } from "@/components/reusable/TransactionModal";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -30,7 +31,7 @@ export default function RootLayout({
             <div className="flex max-w-screen-md w-[745px] h-16 justify-start box-border">
               <MainNav className="mx-4 flex-1 max-w-screen-md" />
               <div className="ml-auto flex items-center space-x-4 mr-4">
-                <w3m-button />
+                <ConnectButton showBalance={false}  />
               </div>
             </div>
             {children}
