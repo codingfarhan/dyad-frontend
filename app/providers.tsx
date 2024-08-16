@@ -32,7 +32,7 @@ const apolloClient = new ApolloClient({
 });
 
 const theme = darkTheme({
-  font: "Inter",
+  font: "Inter, sans-serif",
   borderRadius: "5px",
 });
 
