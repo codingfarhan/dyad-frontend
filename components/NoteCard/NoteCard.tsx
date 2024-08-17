@@ -4,14 +4,11 @@ import React, { useMemo } from "react";
 import NoteCardsContainer from "../reusable/NoteCardsContainer";
 import TabsComponent from "../reusable/TabsComponent";
 import {
-  useReadDyadMintedDyad,
-  useReadVaultManagerCollatRatio,
-  useReadVaultManagerGetTotalValue,
-  useReadVaultManagerMinCollatRatio,
   vaultManagerAbi,
   vaultManagerAddress,
   wEthVaultAbi,
-  useReadVaultManagerGetVaultsValues,
+  dyadAbi,
+  dyadAddress,
 } from "@/generated";
 import { defaultChain } from "@/lib/config";
 import NoteNumber from "./Children/NoteNumber";
@@ -19,37 +16,89 @@ import { NoteNumberDataColumnModel } from "@/models/NoteCardModels";
 import { TabsDataModel } from "@/models/TabsModel";
 import Deposit, { supportedVaults } from "./Children/Deposit";
 import Mint from "./Children/Mint";
-import { useReadContract, useReadContracts } from "wagmi";
+import { useReadContracts } from "wagmi";
 import { maxUint256 } from "viem";
 import { formatNumber, fromBigNumber } from "@/lib/utils";
 import { vaultInfo } from "@/lib/constants";
 
+type ContractData = {
+  collatRatio?: bigint;
+  exoCollateralValue?: bigint;
+  keroCollateralValue?: bigint;
+  totalCollateralValue?: bigint;
+  minCollatRatio?: bigint;
+  mintedDyad?: bigint;
+};
+
 function NoteCard({ tokenId }: { tokenId: string }) {
   // Fetch collateralization ratio
-  const { data: collatRatio, isError: collatRatioError } =
-    useReadVaultManagerCollatRatio({
-      args: [BigInt(tokenId)],
-      chainId: defaultChain.id,
-    });
 
-  // Fetch exogenous collateral value
-  const { data: exoCollat, isError: exoCollatError } =
-    useReadVaultManagerGetVaultsValues({
-      args: [BigInt(tokenId)],
-    });
+  const {
+    data: contractData,
+    isSuccess: dataLoaded,
+    isError: loadDataError,
+  } = useReadContracts({
+    contracts: [
+      {
+        address: vaultManagerAddress[defaultChain.id],
+        abi: vaultManagerAbi,
+        functionName: "collatRatio",
+        args: [BigInt(tokenId)],
+      },
+      {
+        address: vaultManagerAddress[defaultChain.id],
+        abi: vaultManagerAbi,
+        functionName: "getVaultsValues",
+        args: [BigInt(tokenId)],
+      },
+      {
+        address: vaultManagerAddress[defaultChain.id],
+        abi: vaultManagerAbi,
+        functionName: "MIN_COLLAT_RATIO",
+      },
+      {
+        address: dyadAddress[defaultChain.id],
+        abi: dyadAbi,
+        functionName: "mintedDyad",
+        args: [BigInt(tokenId)],
+      },
+    ],
+    allowFailure: false,
+    query: {
+      select: (data) => {
+        const collatRatio = data[0];
+        const exoCollateralValue = data[1][0];
+        const keroCollateralValue = data[1][1];
+        const minCollatRatio = data[2];
+        const mintedDyad = data[3];
+        const totalCollateralValue = exoCollateralValue + keroCollateralValue;
 
-  // Fetch minted DYAD
-  const { data: mintedDyad, isError: mintedDyadError } = useReadDyadMintedDyad({
-    args: [BigInt(tokenId)],
-    chainId: defaultChain.id,
+        return {
+          collatRatio,
+          exoCollateralValue,
+          keroCollateralValue,
+          totalCollateralValue,
+          minCollatRatio,
+          mintedDyad,
+        };
+      },
+    },
   });
 
-  // Fetch collateral value
-  const { data: collateralValue, isError: collateralValueError } =
-    useReadVaultManagerGetTotalValue({
-      args: [BigInt(tokenId)],
-      chainId: defaultChain.id,
-    });
+  const {
+    collatRatio,
+    exoCollateralValue,
+    keroCollateralValue,
+    totalCollateralValue,
+    minCollatRatio,
+    mintedDyad,
+  } = useMemo<ContractData>(() => {
+    if (contractData) {
+      return contractData;
+    } else {
+      return {};
+    }
+  }, [contractData]);
 
   // Check if the vault exists
   const { data: hasVaultData, isError: hasVaultError } = useReadContracts({
@@ -85,53 +134,50 @@ function NoteCard({ tokenId }: { tokenId: string }) {
     }))
     .filter((data) => !!data.value);
 
-  // Fetch minimum collateralization ratio
-  const {
-    data: minCollateralizationRatio,
-    isError: minCollateralizationRatioError,
-  } = useReadVaultManagerMinCollatRatio({
-    chainId: defaultChain.id,
-  });
-
   // Calculate total collateral and collateralization ratio
-  const totalCollateral =
-    collateralValueError || !collateralValue
-      ? "N/A"
-      : `$${formatNumber(fromBigNumber(collateralValue))}`;
-  const collateralizationRatio =
-    collatRatioError || !collatRatio
-      ? "N/A"
-      : collatRatio === maxUint256
-        ? "Infinity"
-        : `${formatNumber(fromBigNumber(collatRatio, 16))}%`;
+  const totalCollateral = dataLoaded
+    ? `$${formatNumber(fromBigNumber(totalCollateralValue))}`
+    : "N/A";
+
+  const collateralizationRatio = dataLoaded
+    ? collatRatio === maxUint256
+      ? "Infinity"
+      : `${formatNumber(fromBigNumber(contractData.collatRatio, 16))}%`
+    : "N/A";
 
   // Calculate total DYAD
-  const totalDyad =
-    mintedDyadError || !mintedDyad ? "N/A" : `${fromBigNumber(mintedDyad)}`;
+  const totalDyad = contractData?.mintedDyad
+    ? `${fromBigNumber(contractData.mintedDyad)}`
+    : "N/A";
 
   // Calculate mintable DYAD
   const mintableDyad = useMemo(() => {
     if (
-      collateralValueError ||
-      minCollateralizationRatioError ||
-      mintedDyadError ||
-      !collateralValue ||
-      !minCollateralizationRatio ||
-      !mintedDyad
+      !dataLoaded ||
+      totalCollateralValue === undefined ||
+      minCollatRatio === undefined ||
+      mintedDyad === undefined ||
+      exoCollateralValue === undefined ||
+      keroCollateralValue === undefined
     ) {
       return "N/A";
     }
+    let usableKero = keroCollateralValue;
+    if (keroCollateralValue > exoCollateralValue) {
+      usableKero = exoCollateralValue;
+    }
     const maxDyad =
-      ((collateralValue || 0n) * 1000000000000000000n) /
-      (minCollateralizationRatio || 1n);
+      ((usableKero + exoCollateralValue) * 1000000000000000000n) /
+      minCollatRatio;
+
     return maxDyad - (mintedDyad || 0n);
   }, [
-    collateralValue,
-    minCollateralizationRatio,
+    dataLoaded,
+    totalCollateralValue,
+    minCollatRatio,
     mintedDyad,
-    collateralValueError,
-    minCollateralizationRatioError,
-    mintedDyadError,
+    exoCollateralValue,
+    keroCollateralValue,
   ]);
 
   // Prepare data for the note
@@ -153,10 +199,9 @@ function NoteCard({ tokenId }: { tokenId: string }) {
     },
     {
       text: "Exogenous Collateral",
-      value:
-        exoCollatError || !exoCollat
-          ? "N/A"
-          : `$${formatNumber(fromBigNumber(exoCollat[0]))}`,
+      value: !dataLoaded
+        ? "N/A"
+        : `$${formatNumber(fromBigNumber(exoCollateralValue))}`,
       highlighted: false,
     },
   ];
@@ -190,12 +235,7 @@ function NoteCard({ tokenId }: { tokenId: string }) {
     {
       label: "Mint & Burn",
       tabKey: "Mint DYAD",
-      content: (
-        <Mint
-          currentCr={collatRatio}
-          tokenId={tokenId}
-        />
-      ),
+      content: <Mint currentCr={collatRatio} tokenId={tokenId} />,
     },
   ];
 

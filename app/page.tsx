@@ -28,20 +28,6 @@ export default function Home() {
 
   const { tokens } = useIDsByOwner(address, balance);
 
-  const keroseneCardsData = [
-    {
-      currency: "ETH - DYAD (Uniswap)",
-      APY: "24",
-      staked: "390",
-      keroseneEarned: "830",
-    },
-    {
-      currency: "DYAD",
-      APY: "12",
-      staked: "1200",
-      keroseneEarned: "500",
-    },
-  ];
   const manageNotesContent = (
     <>
       <BuyNoteWithKerosene />
@@ -57,24 +43,6 @@ export default function Home() {
             />
           ))}
       </div>
-    </>
-  );
-
-  const keroseneData = (
-    <>
-      <div className="mt-12">
-        <ButtonComponent>Claim 1,863 Kerosene</ButtonComponent>
-      </div>
-      {keroseneCardsData.map((card, index) => (
-        <div className="mt-6" key={index}>
-          <KeroseneCard
-            currency={card.currency}
-            staked={card.staked}
-            APY={card.APY}
-            keroseneEarned={card.keroseneEarned}
-          />
-        </div>
-      ))}
     </>
   );
 
