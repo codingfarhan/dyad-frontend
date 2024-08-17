@@ -31,7 +31,7 @@ export const fromBigNumber = (
   number: bigint | string | undefined,
   decimals = 18
 ) => {
-  if (!number || number === "." || number === "0." || number === "n/a")
+  if (number === undefined || number === "." || number === "0." || number === "n/a")
     return NaN;
 
   try {
