@@ -166,9 +166,13 @@ function NoteCard({ tokenId }: { tokenId: string }) {
     if (keroCollateralValue > exoCollateralValue) {
       usableKero = exoCollateralValue;
     }
-    const maxDyad =
+    let maxDyad =
       ((usableKero + exoCollateralValue) * 1000000000000000000n) /
       minCollatRatio;
+
+    if (maxDyad > exoCollateralValue) {
+      maxDyad = exoCollateralValue;
+    }
 
     return maxDyad - (mintedDyad || 0n);
   }, [
