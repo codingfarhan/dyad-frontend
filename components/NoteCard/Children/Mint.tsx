@@ -101,6 +101,7 @@ const Mint = ({ currentCr, tokenId }: MintProps) => {
   }, [burnInputValue, mintInputValue, contractData]);
 
   const onMaxMintHandler = () => {
+    const exoCollateral = fromBigNumber(contractData?.exoCollat);
     const collateral = fromBigNumber(contractData?.totalCollateral);
     const minCollatRatio = fromBigNumber(
       contractData?.minCollateralizationRatio
@@ -108,7 +109,11 @@ const Mint = ({ currentCr, tokenId }: MintProps) => {
     const mintedDyadAmount = fromBigNumber(contractData?.mintedDyad);
 
     // Calculate mintable DYAD from total eligible collateral
-    const mintableDyad = collateral / minCollatRatio - mintedDyadAmount;
+    // even with kerosene, user can mint at most dyad matching their exogenous collateral value
+    const mintableDyad = Math.min(
+      collateral / minCollatRatio - mintedDyadAmount,
+      (exoCollateral - mintedDyadAmount) * 0.995 // 0.995 for safety factor/floating point
+    );
 
     if (mintableDyad < 0) {
       setMintInputValue("0");
