@@ -1,14 +1,25 @@
+
+interface Vault {
+  address: string;
+  symbol: string;
+  asset: string;
+  isWrapped: boolean;
+  requiresApproval: boolean;
+}
+
 interface Deployment {
   dnft: string;
   vaultManagerSLL: string;
   vaultSLL: string;
   dyad: string;
   vaultManager: string;
+  kerosene: string;
   staking: string;
   vault: string;
   weth: string;
   wsteth: string;
   payments: string;
+  vaults: Vault[];
 }
 
 export const deployments: {[id: string]: Deployment} = {
@@ -48,18 +59,6 @@ export const deployments: {[id: string]: Deployment} = {
       },
     ],
   },
-  // "5": {
-  //   dnft: "0x952E31dFeEB29F5398a36602E0E276F2b09B6651",
-  //   vaultManagerSLL: "0x0686d75307040EE0C86790D0a62b6c95e3E857C9",
-  //   vaultSLL: "0x25B716D9dCc09842413161abF0F3ff336d165a87",
-  //   dyad: "0xCf0c2d6aeD80aFD8cB299e7E7F3f311F81C3a766",
-  //   vaultManager: "0xf3128Ac07005a5591dF997A8fBd6a75993827144",
-  //   staking: "0x9D5Fd41ee4A4A09c3135936C7B1595D6b3A779d3",
-  //   vault: "0xba9591e5e7AA188Bb2eEaC0D916F0173Dc5E4701",
-  //   weth: "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6",
-  //   payments: "0x4CA5aF6eCaa88DF00f37EBf08D92F65a8f9192e5",
-  //   wsteth: "0x3c97a8a0210076C2841d1Cf684FeC6234fB314C1",
-  // },
 };
 
 export const MAX_UINT256 =

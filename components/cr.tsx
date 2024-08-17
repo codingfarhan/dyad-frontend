@@ -1,22 +1,25 @@
 import { round } from "../utils/currency";
-import { useState, useEffect } from "react";
+import { useMemo } from "react";
 
-export default function CR({ cr }) {
-  const [textColor, setTextColor] = useState("white");
+type Props = {
+  cr: number;
+};
 
-  useEffect(() => {
+export default function CR({ cr }: Props) {
+
+  const textColor = useMemo(() => {
     if (cr < 150) {
-      setTextColor("#FF0000");
+      return "#FF0000";
     } else if (cr < 200) {
-      setTextColor("#FF8C00");
+      return "#FF8C00";
     } else if (cr < 225) {
-      setTextColor("#FFA500");
+      return "#FFA500";
     } else if (cr < 250) {
-      setTextColor("#FFFF00");
+      return "#FFFF00";
     } else if (cr < 275) {
-      setTextColor("#90EE90");
+      return "#90EE90";
     } else {
-      setTextColor("#008000");
+      return "#008000";
     }
   }, [cr]);
 
