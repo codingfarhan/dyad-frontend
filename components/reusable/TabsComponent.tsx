@@ -15,7 +15,7 @@ export default function TabsComponent({
   tabsData,
   logo,
   inModal = false,
-  urlUpdate = false
+  urlUpdate = false,
 }: tabsComponentPropsInterface) {
   const [selected, setSelected] = useState<Key>(tabsData[0].tabKey);
   const router = useRouter();
@@ -47,10 +47,9 @@ export default function TabsComponent({
           selectedKey={selected}
           onSelectionChange={(key) => {
             setSelected(key);
-            if(urlUpdate) {
+            if (urlUpdate) {
               router.replace("?tab=" + key);
             }
-            
           }}
           classNames={{
             base: "w-full",
@@ -58,17 +57,23 @@ export default function TabsComponent({
               logo ? "w-4/6" : "w-full"
             } relative rounded-none p-0 border-b border-divider ml-auto`,
             cursor: "w-full bg-[#FAFAFA]",
-            tab: "max-w-fit h-7 font-semibold",
+            tab: "max-w-fit h-7 font-semibold p-0 md:p-4 transition-all",
           }}
         >
           {tabsData.map((tab: any) => (
-            <Tab key={tab.tabKey} title={tab.label}>
+            <Tab
+              key={tab.tabKey}
+              title={
+                <div className="text-sm md:text-base transition-all">
+                  {tab.label}
+                </div>
+              }
+            >
               <div className=" overflow-clip">{tab.content}</div>
             </Tab>
           ))}
         </Tabs>
       </div>
     </div>
-    // </div>
   );
 }

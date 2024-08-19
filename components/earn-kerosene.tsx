@@ -12,7 +12,7 @@ import {
 } from "@/generated";
 import { defaultChain } from "@/lib/config";
 import useKerosenePrice from "@/hooks/useKerosenePrice";
-import { useEffect, useMemo } from "react";
+import { ReactNode, useEffect, useMemo } from "react";
 
 export function EarnKeroseneContent() {
   const { address } = useAccount();
@@ -78,162 +78,206 @@ export function EarnKeroseneContent() {
     }
   }, [address, claimTransaction, refetch]);
 
+  const renderCard = (
+    step: string,
+    description: string,
+    bottomComponent: ReactNode,
+    renderKey: any
+  ) => (
+    <NoteCardsContainer key={renderKey}>
+      <div className="text-sm font-semibold text-[#A1A1AA]">
+        <div className="flex w-full flex justify-between items-center">
+          <div className="text-lg w-1/3 md:w-auto md:text-2xl text-[#FAFAFA] transition-all">
+            {step}
+          </div>
+          <div className="text-xs md:text-base w-2/3 md:w-auto md:text-md text-right">
+            {description}
+          </div>
+        </div>
+        {bottomComponent}
+      </div>
+    </NoteCardsContainer>
+  );
+
+  const cardsData = [
+    {
+      step: "Step 1",
+      description: "Claim or buy a Note",
+      bottomComponent: (
+        <div className="flex justify-between mt-[32px] w-full">
+          <div className="w-full flex gap-4">
+            <ClaimModalContent />
+          </div>
+        </div>
+      ),
+    },
+    {
+      step: "Step 2",
+      description: "Deposit collateral and mint DYAD",
+      bottomComponent: (
+        <div className="flex justify-between mt-[32px] w-full">
+          <div className="w-full">
+            <ButtonComponent
+              onClick={() => {
+                window.open(window.location.origin + "?tab=notes", "_self");
+              }}
+            >
+              <div className="text-xs md:text-[0.875rem] transition-all">
+                Switch to Manage Notes tab
+              </div>
+            </ButtonComponent>
+          </div>
+        </div>
+      ),
+    },
+    {
+      step: "Step 3",
+      description: "Provide liquidity to USDC - DYAD on Uniswap v3",
+      bottomComponent: (
+        <div className="flex justify-between mt-[32px] w-full">
+          <div className="w-full">
+            <ButtonComponent
+              onClick={() =>
+                window.open(
+                  "https://app.uniswap.org/add/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/0xFd03723a9A3AbE0562451496a9a394D2C4bad4ab/500?minPrice=1.003256&maxPrice=1.005265"
+                )
+              }
+            >
+              <div className="text-xs md:text-[0.875rem] transition-all">
+                LP USDC - DYAD on Uniswap V3
+              </div>
+            </ButtonComponent>
+          </div>
+        </div>
+      ),
+    },
+    {
+      step: "Step 4",
+      description: "Claim rewards from Merkl",
+      bottomComponent: (
+        <div className="flex flex-col gap-4 justify-between mt-[32px] w-full">
+          {address === undefined ? (
+            <>
+              <p className="text-xs md:text-[0.875rem] transition-all">
+                Connect Wallet to see rewards or
+              </p>
+              <ButtonComponent
+                onClick={() => window.open("https://merkl.angle.money/user/")}
+              >
+                <div className="text-xs md:text-[0.875rem] transition-all">
+                  Check your earnings on Merkl
+                </div>
+              </ButtonComponent>
+            </>
+          ) : (
+            <>
+              <div className="w-full grid grid-cols-3">
+                {loading ? (
+                  <p className="text-xs md:text-[0.875rem] transition-all">
+                    Loading...
+                  </p>
+                ) : error ? (
+                  <p className="col-span-3 text-xs md:text-[0.875rem] transition-all">
+                    {error.message || "An error occurred"}
+                  </p>
+                ) : kerosenePriceError ? (
+                  <p className="col-span-3 text-xs md:text-[0.875rem] transition-all">
+                    {kerosenePriceError.message || "Failed to load price"}
+                  </p>
+                ) : (
+                  <>
+                    <p className="text-xs md:text-[0.875rem] transition-all">
+                      Your total earnings
+                    </p>
+                    <p className="text-xs md:text-[0.875rem] transition-all">
+                      {Number(
+                        formatEther(merklRewards?.accumulated || 0n)
+                      ).toLocaleString()}{" "}
+                      KEROSENE
+                    </p>
+                    <p className="text-xs md:text-[0.875rem] transition-all">{`$${totalUsd}`}</p>
+                    <p className="text-xs md:text-[0.875rem] transition-all">
+                      Total claimable
+                    </p>
+                    <p className="text-xs md:text-[0.875rem] transition-all">
+                      {Number(
+                        formatEther(merklRewards?.unclaimed || 0n)
+                      ).toLocaleString()}{" "}
+                      KEROSENE
+                    </p>
+                    <p className="text-xs md:text-[0.875rem] transition-all">{`$${claimableUsd}`}</p>
+                  </>
+                )}
+              </div>
+              {merklRewards &&
+                claimMerklRewardsConfig !== undefined &&
+                claimError === null && (
+                  <div className="w-full flex gap-4">
+                    <ButtonComponent
+                      disabled={
+                        merklRewards.unclaimed === 0n ||
+                        writingClaim ||
+                        (claimTransactionHash && transactionPending)
+                      }
+                      onClick={() => {
+                        claimMerklRewards(claimMerklRewardsConfig.request);
+                      }}
+                    >
+                      <div className="text-xs md:text-[0.875rem] transition-all">
+                        {merklRewards.unclaimed === 0n
+                          ? "Nothing to claim"
+                          : writingClaim ||
+                              (claimTransactionHash && transactionPending)
+                            ? "Claiming..."
+                            : "Claim"}
+                      </div>
+                    </ButtonComponent>
+                    <ButtonComponent
+                      onClick={() => {
+                        window.open(
+                          `https://merkl.angle.money/ethereum/pool/0x8B238f615c1f312D22A65762bCf601a37f1EeEC7?campaignId=${merklData?.campaignId}`
+                        );
+                      }}
+                    >
+                      <div className="text-xs md:text-[0.875rem] transition-all">
+                        View campaign on Merkl
+                      </div>
+                    </ButtonComponent>
+                  </div>
+                )}
+            </>
+          )}
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div>
       {merklData && (
-        <div className="flex justify-between text-2xl p-[2rem] pl-[5rem] pr-[5rem] font-bold">
-          <div>{merklData.apr?.toFixed(0) || 0}% APR</div>
-          <div>
-            Liquidity: $
-            {Number(merklData.tvl?.toFixed(0) || 0).toLocaleString()}
+        <div className="flex justify-between md:text-2xl p-2 pb-4 md:p-[2rem] md:pl-[5rem] md:pr-[5rem] font-bold transition-all">
+          <div className="flex">
+            <span>{merklData.apr?.toFixed(0) || 0}%</span>
+            <span className="ml-2">APR</span>
+          </div>
+          <div className="flex">
+            <span>Liquidity:</span>{" "}
+            <span className="ml-2">
+              ${Number(merklData.tvl?.toFixed(0) || 0).toLocaleString()}
+            </span>
           </div>
         </div>
       )}
 
       <div className="flex flex-col space-y-4">
-        <NoteCardsContainer>
-          <div className="text-sm font-semibold text-[#A1A1AA]">
-            <div className="flex w-full flex justify-between items-center">
-              <div className="text-2xl text-[#FAFAFA]">Step 1</div>
-              <div>Claim or buy a Note</div>
-            </div>
-            <div className="flex justify-between mt-[32px] w-full">
-              <div className="w-full flex gap-4">
-                <ClaimModalContent />
-              </div>
-            </div>
-          </div>
-        </NoteCardsContainer>
-        <NoteCardsContainer>
-          <div className="text-sm font-semibold text-[#A1A1AA]">
-            <div className="flex w-full flex justify-between items-center">
-              <div className="text-2xl text-[#FAFAFA]">Step 2</div>
-              <div>Deposit collateral and mint DYAD</div>
-            </div>
-            <div className="flex justify-between mt-[32px] w-full">
-              <div className="w-full">
-                <ButtonComponent
-                  onClick={() => {
-                    window.open(window.location.origin + "?tab=notes", "_self");
-                  }}
-                >
-                  Switch to Manage Notes tab
-                </ButtonComponent>
-              </div>
-            </div>
-          </div>
-        </NoteCardsContainer>
-        <NoteCardsContainer>
-          <div className="text-sm font-semibold text-[#A1A1AA]">
-            <div className="flex w-full flex justify-between items-center">
-              <div className="text-2xl text-[#FAFAFA]">Step 3</div>
-              <div>Provide liquidity to USDC - DYAD on Uniswap v3</div>
-            </div>
-            <div className="flex justify-between mt-[32px] w-full">
-              <div className="w-full">
-                <ButtonComponent
-                  onClick={() =>
-                    window.open(
-                      "https://app.uniswap.org/add/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/0xFd03723a9A3AbE0562451496a9a394D2C4bad4ab/500?minPrice=1.003256&maxPrice=1.005265"
-                    )
-                  }
-                >
-                  LP USDC - DYAD on Uniswap V3
-                </ButtonComponent>
-              </div>
-            </div>
-          </div>
-        </NoteCardsContainer>
-        <NoteCardsContainer>
-          <div className="text-sm font-semibold text-[#A1A1AA]">
-            <div className="flex w-full flex justify-between items-center">
-              <div className="text-2xl text-[#FAFAFA]">Step 4</div>
-              <div>Claim rewards from Merkl</div>
-            </div>
-
-            <div className="flex flex-col gap-4 justify-between mt-[32px] w-full">
-              {address === undefined ? (
-                <>
-                  <p>Connect Wallet to see rewards or</p>
-                  <ButtonComponent
-                    onClick={() =>
-                      window.open("https://merkl.angle.money/user/")
-                    }
-                  >
-                    Check your earnings on Merkl
-                  </ButtonComponent>
-                </>
-              ) : (
-                <>
-                  <div className="w-full grid grid-cols-3">
-                    {loading ? (
-                      <p>Loading...</p>
-                    ) : error ? (
-                      <p className="col-span-3">
-                        {error.message || "An error occurred"}
-                      </p>
-                    ) : kerosenePriceError ? (
-                      <p className="col-span-3">
-                        {kerosenePriceError.message || "Failed to load price"}
-                      </p>
-                    ) : (
-                      <>
-                        <p>Your total earnings</p>
-                        <p>
-                          {Number(
-                            formatEther(merklRewards?.accumulated || 0n)
-                          ).toLocaleString()}{" "}
-                          KEROSENE
-                        </p>
-                        <p>{`$${totalUsd}`}</p>
-                        <p>Total claimable</p>
-                        <p>
-                          {Number(
-                            formatEther(merklRewards?.unclaimed || 0n)
-                          ).toLocaleString()}{" "}
-                          KEROSENE
-                        </p>
-                        <p>{`$${claimableUsd}`}</p>
-                      </>
-                    )}
-                  </div>
-                  {merklRewards &&
-                    claimMerklRewardsConfig !== undefined &&
-                    claimError === null && (
-                      <div className="w-full flex gap-4">
-                        <ButtonComponent
-                          disabled={
-                            merklRewards.unclaimed === 0n ||
-                            writingClaim ||
-                            (claimTransactionHash && transactionPending)
-                          }
-                          onClick={() => {
-                            claimMerklRewards(claimMerklRewardsConfig.request);
-                          }}
-                        >
-                          {merklRewards.unclaimed === 0n
-                            ? "Nothing to claim"
-                            : writingClaim ||
-                                (claimTransactionHash && transactionPending)
-                              ? "Claiming..."
-                              : "Claim"}
-                        </ButtonComponent>
-                        <ButtonComponent
-                          onClick={() => {
-                            window.open(
-                              `https://merkl.angle.money/ethereum/pool/0x8B238f615c1f312D22A65762bCf601a37f1EeEC7?campaignId=${merklData?.campaignId}`
-                            );
-                          }}
-                        >
-                          View campaign on Merkl
-                        </ButtonComponent>
-                      </div>
-                    )}
-                </>
-              )}
-            </div>
-          </div>
-        </NoteCardsContainer>
+        {cardsData.map((data) =>
+          renderCard(
+            data.step,
+            data.description,
+            data.bottomComponent,
+            data.step
+          )
+        )}
       </div>
     </div>
   );
