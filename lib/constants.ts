@@ -10,6 +10,8 @@ import {
   tBtcAddress,
   sUsDeVaultAddress,
   sUsDeAddress,
+  weEthVaultAddress,
+  weEthAddress,
 } from "@/generated";
 import { defaultChain } from "@/lib/config";
 
@@ -38,5 +40,10 @@ export const vaultInfo = [
     vaultAddress: sUsDeVaultAddress[defaultChain.id],
     symbol: "sUSDe",
     tokenAddress: sUsDeAddress[defaultChain.id],
+  },
+  {
+    vaultAddress: weEthVaultAddress[defaultChain.id],
+    symbol: "weETH",
+    tokenAddress: weEthAddress[defaultChain.id],
   },
 ];
