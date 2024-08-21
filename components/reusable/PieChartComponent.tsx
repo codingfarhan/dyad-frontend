@@ -22,7 +22,15 @@ const CustomTooltip = ({ active, payload }: {active: any, payload: any}) => {
   }
 };
 
-const insideFillColors = ["#8D8D8D", "#676767", "#EDEDED"];
+const collatColors: Record<string, string> = {
+  "wETH": "#676767",
+  "wstETH": "#00A3FF",
+  "tBTC": "#FF9900",
+  "sUSDe": "#2A2A2A",
+  "KEROSENE": "#EDEDED",
+  "weETH": "#301267",
+}
+
 const outsideFillColors = ["#44e845", "white"];
 const PieChartComponent: React.FC<PieChartComponentProps> = ({
   insideData,
@@ -33,7 +41,7 @@ const PieChartComponent: React.FC<PieChartComponentProps> = ({
     <PieChart width={185} height={185}>
       <Pie data={insideData} dataKey="value" outerRadius={60} stroke="none">
         {insideData?.map((entry, index) => (
-          <Cell key={`cell-${index}`} fill={insideFillColors[index]}/>
+          <Cell key={`cell-${index}`} fill={collatColors[entry.label]}/>
         ))}
       </Pie>
       <Tooltip content={<CustomTooltip />} />
