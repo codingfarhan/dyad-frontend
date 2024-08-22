@@ -273,39 +273,48 @@ const NoteTable: React.FC<any> = ({}) => {
               {
                 key: "rank",
                 label: "Rank",
+                align: "center",
               },
               {
                 key: "id",
                 label: "Note",
+                align: "right",
               },
               {
                 key: "xp",
                 label: "XP",
+                align: "right",
               },
               {
                 key: "xpPercentage",
                 label: "% of XP",
+                align: "right",
               },
               {
                 key: "kerosene",
                 label: "KERO",
+                align: "right",
               },
               {
                 key: "dyad",
                 label: "DYAD",
+                align: "right",
               },
               {
                 key: "collateral",
                 label: "Collateral",
+                align: "right",
               },
               {
                 key: "collatRatio",
                 label: "CR",
+                align: "right",
               },
               {
                 key: "market",
                 sortKey: "priceNormalized",
                 label: "Market",
+                align: "center",
               },
             ]}
             rows={parsedData}
