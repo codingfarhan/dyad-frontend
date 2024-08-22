@@ -2,10 +2,6 @@
 
 import React from "react";
 import { NoteNumberDataColumnModel } from "@/models/NoteCardModels";
-import {
-  PIE_CHART_MOCK_DATA,
-  PIE_CHART_OPTIONS,
-} from "@/mockData/tabsMockData";
 import PieChartComponent, {
   Data,
 } from "@/components/reusable/PieChartComponent";

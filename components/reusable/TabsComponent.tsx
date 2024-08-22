@@ -28,12 +28,7 @@ export default function TabsComponent({
   }, []);
 
   return (
-    <div
-      className={cn(
-        "w-full px-2 flex relative",
-        inModal && "max-w-[464px] pr-6"
-      )}
-    >
+    <div className={cn("w-full px-2 flex", inModal && "max-w-[464px] pr-6")}>
       <div className={cn("w-full", inModal && "max-w-[464px]")}>
         {logo && (
           <div className="h-7 w-1/6 absolute flex">
