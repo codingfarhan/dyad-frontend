@@ -1,10 +1,9 @@
+import { insideFillColors, outsideFillColors } from "@/constants/Charts";
 import { formatNumber } from "@/lib/utils";
+import { Data } from "@/models/ChartModels";
 import { Cell, Pie, PieChart, Tooltip } from "recharts";
-
-export type Data = {
-  label: string;
-  value: number;
-};
+import LineDataChart from "./LineDataChart";
+import { useState } from "react";
 
 interface PieChartComponentProps {
   outsideData: Data[];
@@ -12,37 +11,68 @@ interface PieChartComponentProps {
   options?: any;
 }
 
-const CustomTooltip = ({ active, payload }: {active: any, payload: any}) => {
+const CustomTooltip = ({
+  active,
+  payload,
+}: {
+  active?: any;
+  payload?: any;
+}) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-black border rounded-md p-4">
-        <p className="label">{`${payload[0].payload.label} : ${!payload[0].payload.label.includes('DYAD') ? `$${formatNumber(payload[0].value)}` : payload[0].value}`}</p>
+        <p className="label">{`${payload[0].payload.label} : ${!payload[0].payload.label.includes("DYAD") ? `$${formatNumber(payload[0].value)}` : payload[0].value}`}</p>
       </div>
     );
   }
 };
 
-const insideFillColors = ["#8D8D8D", "#676767", "#EDEDED"];
-const outsideFillColors = ["#44e845", "white"];
 const PieChartComponent: React.FC<PieChartComponentProps> = ({
   insideData,
   outsideData,
   options = {},
 }) => {
+  const [isTooltipOpen, setIsTooltipOpen] = useState<null | string>(null);
+
   return (
-    <PieChart width={185} height={185}>
-      <Pie data={insideData} dataKey="value" outerRadius={60} stroke="none">
-        {insideData?.map((entry, index) => (
-          <Cell key={`cell-${index}`} fill={insideFillColors[index]}/>
-        ))}
-      </Pie>
-      <Tooltip content={<CustomTooltip />} />
-      <Pie data={outsideData} dataKey="value" innerRadius={70} outerRadius={80} stroke="none">
-        {outsideData?.map((entry, index) => (
-          <Cell key={`cell-${index}`} fill={outsideFillColors[index]} />
-        ))}
-      </Pie>
-    </PieChart>
+    <div>
+      <div className="hidden">
+        <PieChart width={185} height={185}>
+          <Pie data={insideData} dataKey="value" outerRadius={60} stroke="none">
+            {insideData?.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={insideFillColors[index]} />
+            ))}
+          </Pie>
+          <Tooltip content={<CustomTooltip />} />
+          <Pie
+            data={outsideData}
+            dataKey="value"
+            innerRadius={70}
+            outerRadius={80}
+            stroke="none"
+          >
+            {outsideData?.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={outsideFillColors[index]} />
+            ))}
+          </Pie>
+        </PieChart>
+      </div>
+      <div className="block rounded-[25px] w-full">
+        <LineDataChart
+          data={outsideData}
+          fillColors={outsideFillColors}
+          isTooltipOpen={isTooltipOpen}
+          setIsTooltipOpen={setIsTooltipOpen}
+        />
+        <LineDataChart
+          data={insideData}
+          fillColors={insideFillColors}
+          isTooltipOpen={isTooltipOpen}
+          setIsTooltipOpen={setIsTooltipOpen}
+          labelDataIndex="$"
+        />
+      </div>
+    </div>
   );
 };
 

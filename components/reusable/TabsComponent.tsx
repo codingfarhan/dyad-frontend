@@ -9,6 +9,8 @@ interface tabsComponentPropsInterface {
   logo?: string | JSX.Element;
   inModal?: boolean;
   urlUpdate?: boolean;
+  selected?: any;
+  setSelected: (value: any) => void;
 }
 
 export default function TabsComponent({
@@ -16,8 +18,10 @@ export default function TabsComponent({
   logo,
   inModal = false,
   urlUpdate = false,
+  selected,
+  setSelected,
 }: tabsComponentPropsInterface) {
-  const [selected, setSelected] = useState<Key>(tabsData[0].tabKey);
+  // const [selected, setSelected] = useState<Key>(tabsData[0].tabKey);
   const router = useRouter();
   const searchParams = useSearchParams();
 
