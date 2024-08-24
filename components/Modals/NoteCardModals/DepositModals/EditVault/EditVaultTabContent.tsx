@@ -19,6 +19,7 @@ import {
   wEthVaultAbi,
 } from "@/generated";
 import { defaultChain } from "@/lib/config";
+import { vaultAbi } from "@/lib/abi/Vault";
 
 interface EditVaultTabContentProps {
   action: "deposit" | "withdraw" | "redeem";
@@ -96,6 +97,12 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
         functionName: "balanceOf",
         args: [address!],
       },
+      {
+        address: keroseneVaultV2Address[defaultChain.id],
+        abi: vaultAbi,
+        functionName: "id2asset",
+        args: [BigInt(tokenId)],
+      }
     ],
     query: {
       select: (data) => ({
@@ -106,6 +113,7 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
         allowance: data[4],
         minCollateralizationRatio: data[5],
         balance: data[6],
+        keroDeposited: data[7],
       }),
     },
   });
@@ -188,16 +196,16 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
               <div className="flex gap-2 text-[#A1A1AA]">
                 <div>XP: </div>
                 <div>
-                  {(parseFloat(xpBalanceOfNote) / 1e18 / 1e9).toFixed(0)}
+                  {(parseFloat(xpBalanceOfNote) / 1e18 / 1e9).toFixed(2)}
                 </div>
               </div>
               <div className="flex gap-2 text-[#A1A1AA]">
                 <div>Accrual Rate: </div>
                 <div>
-                  {((0.000000001 * parseFloat(xpBalanceOfNote)) / 1e18).toFixed(
+                  {((0.000000001 * fromBigNumber(contractData?.keroDeposited ?? 0n)) * 60 * 60 * 24).toFixed(
                     2
                   )}{" "}
-                  / sec
+                  / day
                 </div>
               </div>
               <div className="flex gap-2 text-[#A1A1AA]">
