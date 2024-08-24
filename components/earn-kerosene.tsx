@@ -170,7 +170,7 @@ export function EarnKeroseneContent() {
                       <p>Loading...</p>
                     ) : error ? (
                       <p className="col-span-3">
-                        {error.message || "An error occurred"}
+                        {error.message || "Nothing to claim yet"}
                       </p>
                     ) : kerosenePriceError ? (
                       <p className="col-span-3">
