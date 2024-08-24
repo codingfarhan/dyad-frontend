@@ -29,18 +29,8 @@ const NoteNumber: React.FC<NoteNumberProps> = ({ data, dyad, collateral }) => {
         <div className="w-full justify-center mt-[20px]">
           <div className="w-full m-auto">
             <PieChartComponent
-              // outsideData={dyadData}
-              // insideData={collateral}
-              outsideData={[
-                { label: "DYAD mintable", value: 5 },
-
-                { label: "DYAD minted", value: 2 },
-              ]}
-              insideData={[
-                { label: "test", value: 100 },
-                { label: "test 1", value: 200 },
-                { label: "test 2", value: 400 },
-              ]}
+              outsideData={dyadData}
+              insideData={collateral}
               options={{
                 plugins: {
                   tooltip: {
