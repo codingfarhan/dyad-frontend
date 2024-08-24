@@ -14,9 +14,12 @@ interface PieChartComponentProps {
 
 const CustomTooltip = ({ active, payload }: {active: any, payload: any}) => {
   if (active && payload && payload.length) {
+    const split: string[] = payload[0].payload.label.split("|");
+
     return (
       <div className="bg-black border rounded-md p-4">
-        <p className="label">{`${payload[0].payload.label} : ${!payload[0].payload.label.includes('DYAD') ? `$${formatNumber(payload[0].value)}` : payload[0].value}`}</p>
+        {split.map((label, index) => (<p key={index} className="label">{label}</p>))}
+        <p className="label">{`${!payload[0].payload.label.includes('DYAD') ? `$${formatNumber(payload[0].value)}` : payload[0].value}`}</p>
       </div>
     );
   }
@@ -41,10 +44,10 @@ const PieChartComponent: React.FC<PieChartComponentProps> = ({
     <PieChart width={185} height={185}>
       <Pie data={insideData} dataKey="value" outerRadius={60} stroke="none">
         {insideData?.map((entry, index) => (
-          <Cell key={`cell-${index}`} fill={collatColors[entry.label]}/>
+          <Cell key={`cell-${index}`} fill={collatColors[entry.label.split("|")[0]]}/>
         ))}
       </Pie>
-      <Tooltip content={<CustomTooltip />} />
+      <Tooltip content={<CustomTooltip active={false} payload={undefined} />} />
       <Pie data={outsideData} dataKey="value" innerRadius={70} outerRadius={80} stroke="none">
         {outsideData?.map((entry, index) => (
           <Cell key={`cell-${index}`} fill={outsideFillColors[index]} />
