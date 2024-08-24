@@ -32,18 +32,6 @@ const NoteNumber: React.FC<NoteNumberProps> = ({ data, dyad, collateral }) => {
             <PieChartComponent
               outsideData={dyadData}
               insideData={collateral}
-              options={{
-                plugins: {
-                  tooltip: {
-                    callbacks: {
-                      label: (context: any) => {
-                        const { dataIndex, dataset } = context;
-                        return `  ${dataset.labels[dataIndex]}:  ${typeof dataset.data[dataIndex] === "string" ? "$" : ""}${dataset.data[dataIndex]}`;
-                      },
-                    },
-                  },
-                },
-              }}
             />
           </div>
         </div>
