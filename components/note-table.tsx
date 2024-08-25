@@ -1,5 +1,5 @@
 import TableComponent from "@/components/reusable/TableComponent";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState, useEffect } from "react";
 import { useQuery, gql } from "@apollo/client";
 import { formatCurrency } from "@/utils/currency";
 import Loader from "./loader";
@@ -30,6 +30,11 @@ const NoteTable: React.FC<any> = ({}) => {
   const [selectedListingId, setSelectedListingId] = useState<
     string | undefined
   >(undefined);
+  const [renderCount, setRenderCount] = useState(0);
+
+  useEffect(() => {
+    setRenderCount(prev => prev + 1);
+  }, []);
 
   const { data: totalSupply } = useReadXpTotalSupply();
   const { address } = useAccount();
@@ -77,7 +82,7 @@ const NoteTable: React.FC<any> = ({}) => {
       }
     }
   `;
-  const { loading, error, data } = useQuery(GET_ITEMS);
+  const { loading, error, data } = useQuery(GET_ITEMS, { fetchPolicy: 'network-only', variables: { renderCount } });
 
   const getMarketplaceData = useCallback(
     (id: string) => {
@@ -266,7 +271,7 @@ const NoteTable: React.FC<any> = ({}) => {
         }}
       />
       {loading && <Loader />}
-      {!loading && !error && (
+      {!error && data && (
         <div className="h-[500px]">
           <TableComponent
             columns={[
