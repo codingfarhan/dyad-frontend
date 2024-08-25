@@ -30,7 +30,7 @@ export default function Home() {
 
   const manageNotesContent = (
     <>
-      <BuyNoteWithKerosene />
+      {/* <BuyNoteWithKerosene /> */}
       <div className="my-6 flex justify-between">
         <ClaimModalContent />
       </div>
