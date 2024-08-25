@@ -64,18 +64,10 @@ const Mint = ({ currentCr, tokenId }: MintProps) => {
         const dyadBalance = data[2];
         const minCollateralizationRatio = data[3];
 
-        let totalCollateral = exoCollat;
-        // dollar rule; kero collateral can't exceed exo collateral
-        if (keroCollat > exoCollat) {
-          totalCollateral += exoCollat;
-        } else {
-          totalCollateral += keroCollat;
-        }
-
         return {
           exoCollat,
           keroCollat,
-          totalCollateral,
+          totalCollateral: exoCollat + keroCollat,
           mintedDyad,
           dyadBalance,
           minCollateralizationRatio,
