@@ -5,8 +5,9 @@ import useTvl from "@/hooks/useTvl";
 import useKerosenePrice from "@/hooks/useKerosenePrice";
 import { useReadKeroseneVaultV2AssetPrice } from "@/generated";
 import { fromBigNumber } from "@/lib/utils";
+import React from 'react';
 
-export function MainNav({
+export const MainNav = React.memo(function MainNav({
   className,
   ...props
 }: React.HTMLAttributes<HTMLElement>) {
@@ -93,4 +94,4 @@ export function MainNav({
       </div>
     </nav>
   );
-}
+})
