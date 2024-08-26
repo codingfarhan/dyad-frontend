@@ -32,11 +32,23 @@ export default function TabsComponent({
   }, []);
 
   return (
-    <div className={cn("w-full px-2 flex", inModal && "max-w-[464px] pr-6")}>
-      <div className={cn("w-full", inModal && "max-w-[464px]")}>
+    <div
+      className={cn(
+        "w-full px-2 flex",
+        inModal && "max-w-full md:max-w-[464px] pr-6"
+      )}
+    >
+      <div
+        className={cn(
+          "w-full",
+          inModal && "max-w-[464px] max-w-full md:max-w-[464px]"
+        )}
+      >
         {logo && (
-          <div className="h-7 w-1/6 absolute flex">
-            <div className="w-full h-7 text-2xl">{logo}</div>
+          <div className="h-7 w-1/6 md:w-2/12 absolute flex">
+            <div className="w-full md:h-7 h-full mt-auto text-lg md:text-2xl">
+              {logo}
+            </div>
           </div>
         )}
         <Tabs
@@ -53,7 +65,7 @@ export default function TabsComponent({
           classNames={{
             base: "w-full",
             tabList: `justify-between ${
-              logo ? "w-4/6" : "w-full"
+              logo ? "w-4/6 md:w-9/12" : "w-full"
             } relative rounded-none p-0 border-b border-divider ml-auto`,
             cursor: "w-full bg-[#FAFAFA]",
             tab: "max-w-fit h-7 font-semibold p-0 md:p-4 transition-all",
