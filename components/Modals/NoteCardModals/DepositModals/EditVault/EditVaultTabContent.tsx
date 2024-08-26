@@ -159,7 +159,7 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
             value={inputValue}
             onChange={(value) => setInputValue(value)}
             placeholder={`Amount of ${action === "redeem" ? "DYAD" : symbol} to ${action}...`}
-            className="h-[45px] md:h-[39px] rounded-lg mdrounded-r-none"
+            className="h-[45px] md:h-[39px] rounded-md md:rounded-r-none"
           />
         </div>
         <div className="w-full md:w-[74px]">
