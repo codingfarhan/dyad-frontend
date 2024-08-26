@@ -14,7 +14,7 @@ import { formatNumber, fromBigNumber } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { TabsDataModel } from "@/models/TabsModel";
-import { vaultInfo } from "@/lib/constants";
+import { VaultInfo, vaultInfo } from "@/lib/constants";
 import AddVaultModal from "@/components/Modals/NoteCardModals/DepositModals/AddVault/AddVaultModal";
 
 interface DepositProps {
@@ -65,8 +65,8 @@ const Deposit: React.FC<DepositProps> = ({
         </div>
       </div>
       <div className="grid grid-cols-5 gap-[30px]">
-        {supportedVaults.filter((_,i) => !!vaultData?.at(i)).map((address, i) => (
-          <Vault key={i} tokenId={tokenId} vaultAddress={address} />
+        {vaultInfo.filter((_,i) => !!vaultData?.at(i)).map((vault, i) => (
+          <Vault key={i} tokenId={tokenId} vault={vault} />
         ))}
         {availableVaults &&
           Array.apply(null, Array(availableVaults)).map((_, i) => (
@@ -83,19 +83,19 @@ const Deposit: React.FC<DepositProps> = ({
 export default Deposit;
 
 const Vault = ({
-  vaultAddress,
+  vault,
   tokenId,
 }: {
-  vaultAddress: Address;
+  vault: VaultInfo;
   tokenId: string;
 }) => {
   const { data: hasVault } = useReadVaultManagerHasVault({
     chainId: defaultChain.id,
-    args: [BigInt(tokenId), vaultAddress],
+    args: [BigInt(tokenId), vault.vaultAddress],
   });
   const { data: collateralValue, isLoading: collateralLoading } =
     useReadContract({
-      address: vaultAddress,
+      address: vault.vaultAddress,
       abi: wEthVaultAbi,
       args: [BigInt(tokenId)],
       functionName: "getUsdValue",
@@ -108,7 +108,7 @@ const Vault = ({
   });
 
   const { tokenAddress: collateralAddress, symbol: collateralString } =
-    vaultInfo.filter((value) => value.vaultAddress === vaultAddress)[0];
+    vaultInfo.filter((value) => value.vaultAddress === vault.vaultAddress)[0];
 
   const tabs: TabsDataModel[] = [
     {
@@ -121,7 +121,7 @@ const Vault = ({
           symbol={collateralString}
           collateralizationRatio={collatRatio}
           tokenId={tokenId}
-          vaultAddress={vaultAddress}
+          vaultAddress={vault.vaultAddress}
         />
       ),
     },
@@ -135,7 +135,7 @@ const Vault = ({
           symbol={collateralString}
           collateralizationRatio={collatRatio}
           tokenId={tokenId}
-          vaultAddress={vaultAddress}
+          vaultAddress={vault.vaultAddress}
         />
       ),
     },
@@ -149,7 +149,7 @@ const Vault = ({
           symbol={collateralString!}
           collateralizationRatio={collatRatio}
           tokenId={tokenId}
-          vaultAddress={vaultAddress}
+          vaultAddress={vault.vaultAddress}
         />
       ),
     },
@@ -161,6 +161,7 @@ const Vault = ({
   if (collateralLoading) {
     return <Skeleton className="w-[100px] h-[100px]" />;
   }
+
   return (
     <Dialog>
       <DialogTrigger>
