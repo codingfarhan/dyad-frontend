@@ -138,7 +138,7 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
     );
 
     const maxWithdraw =
-      (totalCollateral - totalDyad * minCollateralRatio) / price - 0.000001;
+      (totalCollateral - totalDyad * minCollateralRatio) / price;
 
     if (maxWithdraw < totalAssetDeposited) {
       return toBigNumber(maxWithdraw);
