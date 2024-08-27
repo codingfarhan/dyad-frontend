@@ -119,6 +119,14 @@ export default defineConfig({
       abi: vaultAbi,
     },
     {
+      name: "weETHVault",
+      address: {
+        [mainnet.id]: "0x5B74DD13D4136443A7831fB7AD139BA123B5071B",
+        [anvil.id]: "0x5B74DD13D4136443A7831fB7AD139BA123B5071B",
+      },
+      abi: vaultAbi,
+    },
+    {
       name: "sUSDeVault",
       address: {
         [mainnet.id]: "0x3FC5c0e19b6287f25EB271c2E8e7Ba898FE7ab29",
@@ -217,6 +225,14 @@ export default defineConfig({
       address: {
         [mainnet.id]: "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497",
         [anvil.id]: "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497",
+      },
+      abi: erc20Abi,
+    },
+    {
+      name: "weETH",
+      address: {
+        [mainnet.id]: "0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee",
+        [anvil.id]: "0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee",
       },
       abi: erc20Abi,
     },

@@ -10,6 +10,8 @@ import {
   tBtcAddress,
   sUsDeVaultAddress,
   sUsDeAddress,
+  weEthVaultAddress,
+  weEthAddress,
 } from "@/generated";
 import { defaultChain } from "@/lib/config";
 
@@ -70,18 +72,18 @@ export const vaultInfo: VaultInfo[] = [
       return data.stakingYield.value;
     },
   },
-  // {
-  //   vaultAddress: weEthVaultAddress[defaultChain.id],
-  //   symbol: "weETH",
-  //   tokenAddress: weEthAddress[defaultChain.id],
-  //   color: "#301267",
-  //   decimals: 18,
-  //   getApr: async () => {
-  //       const resp = await fetch("https://www.etherfi.bid/api/etherfi/apr");
-  //       const data = await resp.json();
-  //       const lastValue = data.latest_aprs.slice(-1);
-  //       const apr = parseFloat(lastValue) / 0.9 / 100;
-  //       return apr;
-  //   }
-  // }
+  {
+    vaultAddress: weEthVaultAddress[defaultChain.id],
+    symbol: "weETH",
+    tokenAddress: weEthAddress[defaultChain.id],
+    color: "#301267",
+    decimals: 18,
+    getApr: async () => {
+        const resp = await fetch("https://www.etherfi.bid/api/etherfi/apr");
+        const data = await resp.json();
+        const lastValue = data.latest_aprs.slice(-1);
+        const apr = parseFloat(lastValue) / 0.9 / 100;
+        return apr;
+    }
+  }
 ];

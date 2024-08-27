@@ -42,6 +42,11 @@ function AddVaultModal({
     (vault) => vaultInfo.filter((info) => info.vaultAddress === vault)[0].symbol
   );
 
+  const vaultDecimals = vaults.map(
+    (vault) =>
+      vaultInfo.filter((info) => info.vaultAddress === vault)[0].decimals
+  );
+
   if (vaults.length === 0) {
     return (
       <div className="flex flex-col gap-3">
@@ -74,7 +79,10 @@ function AddVaultModal({
               <TableRow key={i}>
                 <TableCell>{vaultSymbols[i]}</TableCell>
                 <TableCell>
-                  ${formatNumber(fromBigNumber(assetPrices?.at(i), 8))}
+                  $
+                  {formatNumber(
+                    fromBigNumber(assetPrices?.at(i), vaultDecimals[i])
+                  )}
                 </TableCell>
                 <RowInput
                   tokenId={tokenId}
