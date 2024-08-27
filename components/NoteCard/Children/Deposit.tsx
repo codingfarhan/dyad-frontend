@@ -67,7 +67,7 @@ const Deposit: React.FC<DepositProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-5 gap-2 md:gap-[30px]">
         {vaultInfo
           .filter((_, i) => !!vaultData?.at(i))
-          .map((address, i) => (
+          .map((vault, i) => (
             <Vault key={i} tokenId={tokenId} vault={vault} />
           ))}
         {availableVaults &&

@@ -32,7 +32,9 @@ const LineDataChart: React.FC<LineDataChartProps> = ({
             <Tooltip
               content={
                 <div className="px-1 py-2">
-                  <div className="text-small font-bold">{item.label}</div>
+                  {item.label.split("|").map((labelDataIndex, index) => (
+                    <div key={`tt-label-${index}`} className="text-small font-bold">{labelDataIndex}</div>
+                  ))}
                   <div className="text-tiny">{`${labelDataIndex}${item.value}`}</div>
                 </div>
               }

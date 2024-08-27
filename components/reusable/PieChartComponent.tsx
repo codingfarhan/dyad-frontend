@@ -18,13 +18,13 @@ const CustomTooltip = ({
   active?: any;
   payload?: any;
 }) => {
-  if (active && payload && payload.length) {
+  console.log(active, payload);
+  if (payload && payload.length) {
     const split: string[] = payload[0].payload.label.split("|");
 
     return (
       <div className="bg-black border rounded-md p-4">
         {split.map((label, index) => (<p key={index} className="label">{label}</p>))}
-        <p className="label">{`${!payload[0].payload.label.includes('DYAD') ? `$${formatNumber(payload[0].value)}` : payload[0].value}`}</p>
       </div>
     );
   }
@@ -67,9 +67,10 @@ const PieChartComponent: React.FC<PieChartComponentProps> = ({
           isTooltipOpen={isTooltipOpen}
           setIsTooltipOpen={setIsTooltipOpen}
         />
+        
         <LineDataChart
           data={insideData}
-          fillColors={insideFillColors}
+          fillColors={insideData.map((item) => item.color ?? "")}
           isTooltipOpen={isTooltipOpen}
           setIsTooltipOpen={setIsTooltipOpen}
           labelDataIndex="$"

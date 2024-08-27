@@ -28,6 +28,7 @@ import {
   DropdownItem,
 } from "@nextui-org/react";
 import { Menu } from "lucide-react";
+import { color } from "framer-motion";
 
 type ContractData = {
   collatRatio?: bigint;
@@ -154,6 +155,7 @@ function NoteCard({ tokenId }: { tokenId: string }) {
     return usdCollateral.map((collateral, index) => ({
       label: `${vaultInfo[index].symbol}|${fromBigNumber(tokenCollateral[index]).toFixed(4)}`,
       value: fromBigNumber(collateral),
+      color: vaultInfo[index].color,
     }));
   }, [tokenCollateral, usdCollateral]);
 
