@@ -1,16 +1,16 @@
-"use client";
-
 import "./globals.css";
 import { Inter } from "next/font/google";
 
 import { cn } from "@/lib/utils";
 import { Footer } from "@/components/ui/footer";
 import { MainNav } from "@/components/ui/main-nav";
-import MobileNotSupported from "@/components/ui/MobileNotSupported";
+import { Metadata } from "next";
+import { metadata as meta } from "./metadata";
 import { Providers } from "./providers";
 import { TransactionModal } from "@/components/reusable/TransactionModal";
 
 const inter = Inter({ subsets: ["latin"] });
+export const metadata: Metadata = meta;
 
 export default function RootLayout({
   children,
