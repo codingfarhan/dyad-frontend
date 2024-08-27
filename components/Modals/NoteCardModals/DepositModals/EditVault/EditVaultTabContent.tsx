@@ -265,8 +265,8 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
                     functionName: action === "redeem" ? "redeemDyad" : action,
                     args:
                       action === "deposit"
-                        ? [tokenId, vaultAddress, inputValue]
-                        : [tokenId, vaultAddress, inputValue, address],
+                        ? [tokenId, vault.vaultAddress, inputValue]
+                        : [tokenId, vault.vaultAddress, inputValue, address],
                   },
                   description: `${action} ${formatNumber(fromBigNumber(inputValue), 4)} ${action === "redeem" ? "DYAD" : symbol}`,
                 });
