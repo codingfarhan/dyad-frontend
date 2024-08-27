@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState, useEffect } from "react";
 import { useQuery, gql } from "@apollo/client";
 import { formatCurrency } from "@/utils/currency";
 import Loader from "./loader";
@@ -14,10 +14,8 @@ import {
   BuyModal,
   CancelListingModal,
   EditListingModal,
-  ListingData,
   ListModal,
   useListings,
-  useUserListings,
 } from "@reservoir0x/reservoir-kit-ui";
 import { maxUint256 } from "viem";
 import { web3Modal } from "@/lib/web3Modal";
@@ -32,6 +30,11 @@ const NoteTable: React.FC<any> = ({}) => {
   const [selectedListingId, setSelectedListingId] = useState<
     string | undefined
   >(undefined);
+  const [renderCount, setRenderCount] = useState(0);
+
+  useEffect(() => {
+    setRenderCount(prev => prev + 1);
+  }, []);
 
   const { data: totalSupply } = useReadXpTotalSupply();
   const { address } = useAccount();
@@ -79,7 +82,7 @@ const NoteTable: React.FC<any> = ({}) => {
       }
     }
   `;
-  const { loading, error, data } = useQuery(GET_ITEMS);
+  const { loading, error, data } = useQuery(GET_ITEMS, { fetchPolicy: 'network-only', variables: { renderCount } });
 
   const getMarketplaceData = useCallback(
     (id: string) => {

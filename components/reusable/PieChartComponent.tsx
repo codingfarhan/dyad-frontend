@@ -19,9 +19,12 @@ const CustomTooltip = ({
   payload?: any;
 }) => {
   if (active && payload && payload.length) {
+    const split: string[] = payload[0].payload.label.split("|");
+
     return (
       <div className="bg-black border rounded-md p-4">
-        <p className="label">{`${payload[0].payload.label} : ${!payload[0].payload.label.includes("DYAD") ? `$${formatNumber(payload[0].value)}` : payload[0].value}`}</p>
+        {split.map((label, index) => (<p key={index} className="label">{label}</p>))}
+        <p className="label">{`${!payload[0].payload.label.includes('DYAD') ? `$${formatNumber(payload[0].value)}` : payload[0].value}`}</p>
       </div>
     );
   }

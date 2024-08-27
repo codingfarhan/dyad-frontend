@@ -35,7 +35,16 @@ export const fromBigNumber = (
     return NaN;
 
   try {
-    if (typeof number === "string") number = BigInt(number);
+    if (typeof number === "string") {
+      // Handle scientific notation
+      if (number.includes('e')) {
+        const [mantissa, exponent] = number.split('e');
+        const expandedNumber = parseFloat(mantissa) * Math.pow(10, parseInt(exponent));
+        number = BigInt(Math.round(expandedNumber));
+      } else {
+        number = BigInt(number);
+      }
+    }
   } catch (e) {
     return NaN; // Return NaN or handle the error as needed
   }
