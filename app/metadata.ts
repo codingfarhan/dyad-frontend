@@ -10,24 +10,24 @@ export const metadata: Metadata = {
   themeColor: "#ffffff",
   icons: [
     {
-      url: "apple-touch-icon.png",
+      url: "https://app.dyadstable.xyz/apple-touch-icon.png",
       sizes: "180x180",
       rel: "apple-touch-icon",
     },
     {
-      url: "favicon-32x32.png",
+      url: "https://app.dyadstable.xyz/favicon-32x32.png",
       type: "image/png",
       sizes: "32x32",
       rel: "icon",
     },
     {
-      url: "favicon-64x64.png",
+      url: "https://app.dyadstable.xyz/favicon-64x64.png",
       type: "image/png",
       sizes: "64x64",
       rel: "icon",
     },
     {
-      url: "safari-pinned-tab.svg",
+      url: "https://app.dyadstable.xyz/safari-pinned-tab.svg",
       rel: "mask-icon",
     },
   ],
@@ -36,11 +36,11 @@ export const metadata: Metadata = {
     title,
     description,
     siteName: title,
-    images: ["preview.png"],
+    images: ["https://app.dyadstable.xyz/preview.png"],
   },
   twitter: {
     title,
     description,
-    images: ["preview.png"],
+    images: ["https://app.dyadstable.xyz/preview.png"],
   },
 };

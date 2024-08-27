@@ -62,19 +62,19 @@ function AddVaultModal({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="text-2xl font-semibold">
+      <div className="text-md md:text-2xl pt-4 font-semibold">
         Add new collateral type to your Note
       </div>
       <ScrollArea className="max-h-[600px]">
         <Table>
           <TableHeader>
-            <TableRow>
+            <TableRow className="text-xs md:text-base">
               <TableHead>Collateral</TableHead>
               <TableHead>Oracle Price</TableHead>
               <TableHead />
             </TableRow>
           </TableHeader>
-          <TableBody>
+          <TableBody className="text-xs md:text-base">
             {vaults.map((address, i) => (
               <TableRow key={i}>
                 <TableCell>{vaultSymbols[i]}</TableCell>
@@ -113,7 +113,7 @@ const RowInput = ({
   return (
     <>
       <TableCell>
-        <DialogClose>
+        <DialogClose className="w-full">
           <ButtonComponent
             onClick={() =>
               setTransactionData({

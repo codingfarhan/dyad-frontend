@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { Fragment, useMemo, useState } from "react";
 import NoteCardsContainer from "../reusable/NoteCardsContainer";
 import TabsComponent from "../reusable/TabsComponent";
 import {
@@ -20,6 +20,15 @@ import { useReadContracts } from "wagmi";
 import { maxUint256 } from "viem";
 import { formatNumber, fromBigNumber } from "@/lib/utils";
 import { vaultInfo } from "@/lib/constants";
+import { Data } from "../reusable/PieChartComponent";
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+} from "@nextui-org/react";
+import { Menu } from "lucide-react";
+import { color } from "framer-motion";
 
 type ContractData = {
   collatRatio?: bigint;
@@ -114,7 +123,7 @@ function NoteCard({ tokenId }: { tokenId: string }) {
   const hasVault = (hasVaultData?.filter((data) => !!data)?.length || 0) > 0;
 
   // Fetch vault collateral values
-  const { data: vaultCollateral, isError: vaultCollateralError } =
+  const { data: usdCollateral, isError: vaultCollateralError } =
     useReadContracts({
       contracts: supportedVaults.map((address) => ({
         address: address,
@@ -126,13 +135,29 @@ function NoteCard({ tokenId }: { tokenId: string }) {
       allowFailure: false,
     });
 
-  // Calculate vault USD values
-  const vaultUsd = vaultCollateral
-    ?.map((value, i) => ({
-      value: fromBigNumber(value),
-      label: vaultInfo[i].symbol,
-    }))
-    .filter((data) => !!data.value);
+    const { data: tokenCollateral, isError: tokenCollateralError } =
+    useReadContracts({
+      contracts: supportedVaults.map((address) => ({
+        address: address,
+        abi: wEthVaultAbi,
+        functionName: "id2asset",
+        args: [BigInt(tokenId)],
+        chainId: defaultChain.id,
+      })),
+      allowFailure: false,
+    });
+
+  const vaultAmounts: Data[] = useMemo(() => {
+    if (!usdCollateral || !tokenCollateral) {
+      return [];
+    }
+
+    return usdCollateral.map((collateral, index) => ({
+      label: `${vaultInfo[index].symbol}|${fromBigNumber(tokenCollateral[index]).toFixed(4)}`,
+      value: fromBigNumber(collateral),
+      color: vaultInfo[index].color,
+    }));
+  }, [tokenCollateral, usdCollateral]);
 
   // Calculate total collateral and collateralization ratio
   const totalCollateral = dataLoaded
@@ -219,7 +244,7 @@ function NoteCard({ tokenId }: { tokenId: string }) {
         <NoteNumber
           data={noteData}
           dyad={[fromBigNumber(mintableDyad), fromBigNumber(mintedDyad)]}
-          collateral={vaultUsd as any}
+          collateral={vaultAmounts}
         />
       ) : (
         <p>Deposit collateral to open vault</p>
@@ -243,9 +268,45 @@ function NoteCard({ tokenId }: { tokenId: string }) {
     },
   ];
 
+  const [activeTab, setActiveTab] = useState(tabData[0].tabKey);
+
+  const renderActiveTabContent = (activeTabKey: string) => {
+    return tabData.find((tab: TabsDataModel) => activeTab === tab.tabKey)
+      ?.content;
+  };
+
   return (
     <NoteCardsContainer>
-      <TabsComponent tabsData={tabData} />
+      <Fragment>
+        <div className="md:hidden block">
+          <div className=" flex justify-between">
+            <div className="text-md">Note Nº {tokenId}</div>
+            <Dropdown>
+              <DropdownTrigger>
+                <Menu />
+              </DropdownTrigger>
+              <DropdownMenu aria-label="Dropdown Variants">
+                {tabData.map((tab: TabsDataModel) => (
+                  <DropdownItem
+                    key={tab.tabKey}
+                    onClick={() => setActiveTab(tab.tabKey)}
+                  >
+                    {tab.label}
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            </Dropdown>
+          </div>
+          {renderActiveTabContent(activeTab)}
+        </div>
+        <div className="hidden md:block">
+          <TabsComponent
+            tabsData={tabData}
+            selected={activeTab}
+            setSelected={setActiveTab}
+          />
+        </div>
+      </Fragment>
     </NoteCardsContainer>
   );
 }

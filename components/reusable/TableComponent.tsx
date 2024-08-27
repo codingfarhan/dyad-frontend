@@ -9,6 +9,8 @@ import {
 } from "@nextui-org/react";
 import React, { useState } from "react";
 
+type Alignment = "left" | "center" | "right";
+
 interface TableComponentProps {
   columns: any;
   rows: any;
@@ -70,6 +72,19 @@ const TableComponent: React.FC<TableComponentProps> = ({
     })
   };
 
+  const classAlignment = {
+    right: "text-right",
+    center: "text-center",
+    left: "text-left",
+  }
+
+  const getAlignment = (columnKey: any, columns: any) => {  
+    const column = columns.find((col: any) => col.key === columnKey);
+    if (column?.align) {
+      return classAlignment[column.align as Alignment];
+    }
+  }
+
   return (
     <div className="h-full overflow-scroll">
       <Table
@@ -77,12 +92,12 @@ const TableComponent: React.FC<TableComponentProps> = ({
         removeWrapper
         shadow="none"
         classNames={{
-          th: " table-header ",
+          th: " table-header text-center",
           tbody: "px-2 h-full ",
           tr: `${onRowClick ? "cursor-pointer hover:text-[#a1a1aa]" : ""} ${
             size === "compact" ? "h-[35px]" : "h-[50px]"
           } table-row `,
-          td: "px-0 pl-2",
+          td: "px-0 pl-2 pr-2",
         }}
       >
         <TableHeader columns={columns}>
@@ -103,7 +118,7 @@ const TableComponent: React.FC<TableComponentProps> = ({
               onClick={onRowClick ? () => onRowClick(item.key) : () => {}}
             >
               {(columnKey) => (
-                <TableCell>{getKeyValue(item, columnKey)}</TableCell>
+                <TableCell className={getAlignment(columnKey, columns)}>{getKeyValue(item, columnKey)}</TableCell>
               )}
             </TableRow>
           )}

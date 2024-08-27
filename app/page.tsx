@@ -12,6 +12,7 @@ import useIDsByOwner from "@/hooks/useIDsByOwner";
 import dynamic from "next/dynamic";
 import NoteTable from "@/components/note-table";
 import { BuyNoteWithKerosene } from "@/components/buy-note-kerosene";
+import { useState } from "react";
 
 const TabsComponent = dynamic(
   () => import("@/components/reusable/TabsComponent"),
@@ -30,7 +31,7 @@ export default function Home() {
 
   const manageNotesContent = (
     <>
-      <BuyNoteWithKerosene />
+      {/* <BuyNoteWithKerosene /> */}
       <div className="my-6 flex justify-between">
         <ClaimModalContent />
       </div>
@@ -64,9 +65,16 @@ export default function Home() {
     },
   ];
 
+  const [selected, setSelected] = useState(tabsData[0].tabKey);
+
   return (
     <div className="flex-1 max-w-screen-md w-full p-4 mt-4">
-      <TabsComponent tabsData={tabsData} urlUpdate />
+      <TabsComponent
+        tabsData={tabsData}
+        urlUpdate
+        selected={selected}
+        setSelected={setSelected}
+      />
     </div>
   );
 }

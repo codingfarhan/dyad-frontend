@@ -62,8 +62,10 @@ export function ClaimModalContent() {
       <BuyModal
         trigger={
           <ButtonComponent>
-            Buy Note Nº {bestListing?.criteria?.data?.token?.tokenId} for{" "}
-            {bestListing.price?.amount?.decimal} ETH
+            <div className="text-xs md:text-[0.875rem] transition-all">
+              Buy Note Nº {bestListing?.criteria?.data?.token?.tokenId} for{" "}
+              {bestListing.price?.amount?.decimal} ETH
+            </div>
           </ButtonComponent>
         }
         token={`${dNftAddress[defaultChain.id]}:${bestListing?.criteria?.data?.token?.tokenId}`}
@@ -88,10 +90,16 @@ export function ClaimModalContent() {
           });
         }}
       >
-        Mint Note Nº {nextNote} for {mintPrice} ETH
+        <div className="text-xs md:text-[0.875rem] transition-all">
+          Mint Note Nº {nextNote} for {mintPrice} ETH
+        </div>
       </ButtonComponent>
     );
   }
 
-  return <p>Connect wallet to view notes</p>;
+  return (
+    <p className="text-xs md:text-[0.875rem] transition-all">
+      Connect wallet to view notes
+    </p>
+  );
 }
