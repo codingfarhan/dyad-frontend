@@ -20,10 +20,11 @@ import {
 } from "@/generated";
 import { defaultChain } from "@/lib/config";
 import { vaultAbi } from "@/lib/abi/Vault";
+import { VaultInfo } from "@/lib/constants";
 
 interface EditVaultTabContentProps {
   action: "deposit" | "withdraw" | "redeem";
-  vaultAddress: Address;
+  vault: VaultInfo;
   token: Address;
   symbol: string;
   collateralizationRatio: bigint | undefined;
@@ -36,7 +37,7 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
   symbol,
   collateralizationRatio,
   tokenId,
-  vaultAddress,
+  vault,
 }) => {
   const [inputValue, setInputValue] = useState("");
   const { address } = useAccount();
@@ -66,14 +67,14 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
         chainId: defaultChain.id,
       },
       {
-        address: vaultAddress,
+        address: vault.vaultAddress,
         abi: wEthVaultAbi,
         functionName: "id2asset",
         args: [BigInt(tokenId)],
         chainId: defaultChain.id,
       },
       {
-        address: vaultAddress,
+        address: vault.vaultAddress,
         abi: wEthVaultAbi,
         functionName: "assetPrice",
         chainId: defaultChain.id,
@@ -121,21 +122,23 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
   const newCr =
     ((fromBigNumber(contractData?.collateralValue) +
       (action === "deposit"
-        ? fromBigNumber(inputValue) * fromBigNumber(contractData?.assetValue, 8)
+        ? fromBigNumber(inputValue) * fromBigNumber(contractData?.assetValue, vault.decimals)
         : -fromBigNumber(inputValue) *
-          fromBigNumber(contractData?.assetValue, 8))) /
+          fromBigNumber(contractData?.assetValue, vault.decimals))) /
       fromBigNumber(contractData?.mintedDyad)) *
     100;
 
   const theoreticalMaxWithdraw = useMemo(() => {
     const totalAssetDeposited = fromBigNumber(contractData?.totalDeposited);
-    const price = fromBigNumber(contractData?.assetValue, 8);
+    const price = fromBigNumber(contractData?.assetValue, vault.decimals);
 
     const totalCollateral = fromBigNumber(contractData?.collateralValue);
     const totalDyad = fromBigNumber(contractData?.mintedDyad);
     const minCollateralRatio = fromBigNumber(
       contractData?.minCollateralizationRatio
     );
+
+    console.log(totalCollateral, totalDyad, minCollateralRatio, price);
 
     const maxWithdraw =
       (totalCollateral - totalDyad * minCollateralRatio) / price;
@@ -196,7 +199,7 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
             </div>
           </div>
         )}
-      {vaultAddress === keroseneVaultV2Address[defaultChain.id] && (
+      {vault.vaultAddress === keroseneVaultV2Address[defaultChain.id] && (
         <div>
           {xpBalanceOfNote !== undefined && xpTotalSupply !== undefined && (
             <div className="block md:flex justify-between text-sm gap-4">

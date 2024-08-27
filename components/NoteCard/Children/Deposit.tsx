@@ -123,7 +123,7 @@ const Vault = ({
           symbol={collateralString}
           collateralizationRatio={collatRatio}
           tokenId={tokenId}
-          vaultAddress={vault.vaultAddress}
+          vault={vault}
         />
       ),
     },
@@ -137,7 +137,7 @@ const Vault = ({
           symbol={collateralString}
           collateralizationRatio={collatRatio}
           tokenId={tokenId}
-          vaultAddress={vault.vaultAddress}
+          vault={vault}
         />
       ),
     },
@@ -151,7 +151,7 @@ const Vault = ({
           symbol={collateralString!}
           collateralizationRatio={collatRatio}
           tokenId={tokenId}
-          vaultAddress={vault.vaultAddress}
+          vault={vault}
         />
       ),
     },
