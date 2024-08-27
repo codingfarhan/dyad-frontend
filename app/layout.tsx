@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import "./globals.css";
 import { Inter } from "next/font/google";
@@ -26,17 +26,14 @@ export default function RootLayout({
         )}
       >
         <Providers>
-          <main className="flex flex-col min-h-screen items-center desktop-view">
-            <div className="flex max-w-screen-md w-[745px] h-16 justify-start box-border">
+          <main className="flex flex-col min-h-screen items-center">
+            <div className="flex relative max-w-screen-md w-full md:w-[745px] justify-start box-border md:pb-8 pb-12 pt-8">
               <MainNav className="mx-4 flex-1 max-w-screen-md" />
-              <div className="ml-auto flex items-center space-x-4 mr-4">
-                <w3m-button />
-              </div>
             </div>
             {children}
             <Footer />
           </main>
-          <MobileNotSupported />
+          {/* <MobileNotSupported /> */}
           <TransactionModal />
         </Providers>
       </body>

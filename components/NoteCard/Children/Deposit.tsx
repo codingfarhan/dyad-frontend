@@ -50,24 +50,26 @@ const Deposit: React.FC<DepositProps> = ({
 
   return (
     <div className="w-full">
-      <div className="flex justify-between text-sm font-semibold my-[37px] px-[15px]">
-        <div className="flex text-[#A1A1AA]">
+      <div className="block md:flex justify-between text-sm font-semibold my-6 md:my-[37px] md:px-[15px]">
+        <div className="flex justify-between text-[#A1A1AA] mb-2 md:mb-0">
           <div className="mr-[5px]">Total collateral: </div>
           <div>{total_collateral}</div>
         </div>
-        <div className="flex text-[#FAFAFA]">
+        <div className="flex justify-between text-[#FAFAFA]">
           <div className="mr-[5px]">Collateralization ratio:</div>
-          <p>
+          <p className="mt-auto">
             {collateralization_ratio === maxUint256
               ? "Infinity"
               : `${formatNumber(fromBigNumber(collateralization_ratio, 16))}%`}
           </p>
         </div>
       </div>
-      <div className="grid grid-cols-5 gap-[30px]">
-        {vaultInfo.filter((_,i) => !!vaultData?.at(i)).map((vault, i) => (
-          <Vault key={i} tokenId={tokenId} vault={vault} />
-        ))}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-2 md:gap-[30px]">
+        {vaultInfo
+          .filter((_, i) => !!vaultData?.at(i))
+          .map((vault, i) => (
+            <Vault key={i} tokenId={tokenId} vault={vault} />
+          ))}
         {availableVaults &&
           Array.apply(null, Array(availableVaults)).map((_, i) => (
             <AddVault
@@ -159,18 +161,22 @@ const Vault = ({
     return null;
   }
   if (collateralLoading) {
-    return <Skeleton className="w-[100px] h-[100px]" />;
+    return (
+      <Skeleton className="rounded-md md:rounded-none w-full md:w-[100px] h-9 md:h-[100px]" />
+    );
   }
 
   return (
     <Dialog>
-      <DialogTrigger>
-        <div className="font-semibold text-[#FAFAFA] text-sm items-center justify-center flex flex-col gap-2 w-[100px] h-[100px] bg-[#282828]">
+      <DialogTrigger className="h-full w-full">
+        <div
+          className={`font-semibold text-[#FAFAFA] text-sm items-center justify-center flex flex-row md:flex-col gap-2 rounded-md md:rounded-none w-full md:w-[100px] h-9 md:h-[100px] bg-[#282828]`}
+        >
           <p>{collateralString}</p>
           <p>${formatNumber(fromBigNumber(collateralValue))}</p>
         </div>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-[90vw] md:max-w-lg px-[0px] md:px-8 pt-8 ml-auto">
         <EditVaultModal tabsData={tabs} logo={collateralString} />
       </DialogContent>
     </Dialog>
@@ -186,12 +192,14 @@ const AddVault = ({
 }) => {
   return (
     <Dialog>
-      <DialogTrigger>
-        <div className="font-semibold text-[#FAFAFA] text-sm items-center justify-center flex flex-col gap-2 w-[100px] h-[100px] bg-transparent border border-white/30">
+      <DialogTrigger className="h-full w-full">
+        <div
+          className={`font-semibold text-[#FAFAFA] text-sm items-center justify-center flex flex-col rounded-md md:rounded-none gap-2 w-full md:w-[100px] h-9 md:h-[100px] bg-transparent border border-white/30`}
+        >
           <p>+</p>
         </div>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-[90vw] md:max-w-fit">
         <AddVaultModal vaults={vaultAddresses} tokenId={tokenId} />
       </DialogContent>
     </Dialog>

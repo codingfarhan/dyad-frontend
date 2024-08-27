@@ -14,6 +14,7 @@ interface SortbyComponentProps {
   onValueChange: (selectedValue: string) => void;
   sortOptions: SortOptionsInterface[];
   label?: string;
+  icon?: any;
 }
 
 const SortbyComponent: React.FC<SortbyComponentProps> = ({
@@ -21,13 +22,14 @@ const SortbyComponent: React.FC<SortbyComponentProps> = ({
   sortOptions,
   selected,
   onValueChange,
+  icon,
 }) => {
   return (
     <PopupComponent
       trigger={
         <div>
           <ButtonComponent
-            styles={{
+            style={{
               width: "40px",
               paddingRight: "0px",
               paddingLeft: "0px",
@@ -39,7 +41,7 @@ const SortbyComponent: React.FC<SortbyComponentProps> = ({
                 margin: "auto",
               }}
             >
-              <img src={filterIcon.src} />
+              {icon ? icon : <img src={filterIcon.src} />}
             </div>
           </ButtonComponent>
         </div>

@@ -111,24 +111,15 @@
   }
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 @layer base {
   * {
     @apply border-border;
   }
   body {
     @apply bg-background text-foreground;
-  }
-}
-
-.mobile-view {
-  display: none;
-}
-
-@media only screen and (max-width: 745px) {
-  .desktop-view {
-    display: none;
-  }
-  .mobile-view {
-    display: block;
   }
 }

@@ -1,4 +1,3 @@
-import TableComponent from "@/components/reusable/TableComponent";
 import React, { useCallback, useMemo, useState, useEffect } from "react";
 import { useQuery, gql } from "@apollo/client";
 import { formatCurrency } from "@/utils/currency";
@@ -20,6 +19,7 @@ import {
 } from "@reservoir0x/reservoir-kit-ui";
 import { maxUint256 } from "viem";
 import { web3Modal } from "@/lib/web3Modal";
+import MarketplaceList from "./Marketplace/MarketplaceList";
 
 const NoteTable: React.FC<any> = ({}) => {
   const listModalOpenState = useState(false);
@@ -198,7 +198,7 @@ const NoteTable: React.FC<any> = ({}) => {
             ),
           }))
           .sort((a: any, b: any) => parseFloat(b.xp) - parseFloat(a.xp))
-          .map((item, index) => ({
+          .map((item, index: number) => ({
             ...item,
             rank: index + 1,
             ...getMarketplaceData(item.id),
@@ -271,63 +271,7 @@ const NoteTable: React.FC<any> = ({}) => {
         }}
       />
       {loading && <Loader />}
-      {!error && data && (
-        <div className="h-[500px]">
-          <TableComponent
-            columns={[
-              {
-                key: "rank",
-                label: "Rank",
-                align: "center",
-              },
-              {
-                key: "id",
-                label: "Note",
-                align: "right",
-              },
-              {
-                key: "xp",
-                label: "XP",
-                align: "right",
-              },
-              {
-                key: "xpPercentage",
-                label: "% of XP",
-                align: "right",
-              },
-              {
-                key: "kerosene",
-                label: "KERO",
-                align: "right",
-              },
-              {
-                key: "dyad",
-                label: "DYAD",
-                align: "right",
-              },
-              {
-                key: "collateral",
-                label: "Collateral",
-                align: "right",
-              },
-              {
-                key: "collatRatio",
-                label: "CR",
-                align: "right",
-              },
-              {
-                key: "market",
-                sortKey: "priceNormalized",
-                label: "Market",
-                align: "center",
-              },
-            ]}
-            rows={parsedData}
-            size="compact"
-            // onRowClick={onRowClickHandler}
-          />
-        </div>
-      )}
+      {!loading && !error && <MarketplaceList cardsData={parsedData} />}
       {!loading && !error && (
         <div className="flex justify-end mt-4 text-sm text-muted-foreground">
           *only Notes that minted DYAD are ranked

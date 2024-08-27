@@ -77,27 +77,25 @@ const Mint = ({ currentCr, tokenId }: MintProps) => {
   });
 
   const newCr = useMemo(() => {
-
     let burnAmount = fromBigNumber(burnInputValue);
     let mintAmount = fromBigNumber(mintInputValue);
 
     if (isNaN(burnAmount)) burnAmount = 0;
-    if (isNaN(mintAmount)) mintAmount = 0
-    
-    const newMintedDyad = fromBigNumber(contractData?.mintedDyad) + mintAmount - burnAmount;
+    if (isNaN(mintAmount)) mintAmount = 0;
+
+    const newMintedDyad =
+      fromBigNumber(contractData?.mintedDyad) + mintAmount - burnAmount;
     if (newMintedDyad < 0) return 0;
 
     const collateral = fromBigNumber(contractData?.totalCollateral);
-    return collateral / newMintedDyad * 100;
-
+    return (collateral / newMintedDyad) * 100;
   }, [burnInputValue, mintInputValue, contractData]);
 
   const onMaxMintHandler = () => {
     const exoCollateral = fromBigNumber(contractData?.exoCollat);
     const collateral = fromBigNumber(contractData?.totalCollateral);
-    const minCollatRatio = fromBigNumber(
-      contractData?.minCollateralizationRatio
-    ) + 0.01;
+    const minCollatRatio =
+      fromBigNumber(contractData?.minCollateralizationRatio) + 0.01;
     const mintedDyadAmount = fromBigNumber(contractData?.mintedDyad);
 
     // Calculate mintable DYAD from total eligible collateral
@@ -123,7 +121,11 @@ const Mint = ({ currentCr, tokenId }: MintProps) => {
   };
 
   if (contractData?.exoCollat === 0n && !contractData?.exoCollat) {
-    return <p>Deposit collateral to mint DYAD</p>;
+    return (
+      <p className="text-sm md:text-base mt-4">
+        Deposit collateral to mint DYAD
+      </p>
+    );
   }
 
   const StackedValue = ({
@@ -134,7 +136,7 @@ const Mint = ({ currentCr, tokenId }: MintProps) => {
     value: string;
   }) => {
     return (
-      <div className="flex flex-col">
+      <div className="flex flex-row justify-between md:flex-col">
         <div className="mr-[5px]">{description}:</div>
         <div>{value}</div>
       </div>
@@ -143,73 +145,79 @@ const Mint = ({ currentCr, tokenId }: MintProps) => {
 
   return (
     <div className="text-sm font-semibold text-[#A1A1AA]">
-      <div className="flex justify-between mt-[32px] w-full">
-        <div className="w-[380px] ">
+      <div className="block md:flex justify-between mt-[32px] w-full">
+        <div className="w-full md:w-[380px]">
           <BigIntInput
             value={mintInputValue}
             onChange={(value) => setMintInputValue(value)}
             placeholder="Amount of DYAD to mint..."
+            className="h-[45px] md:h-[39px] rounded-md md:rounded-r-none"
           />
         </div>
-        <div className="w-[74px]">
-          <ButtonComponent variant="bordered" onClick={onMaxMintHandler}>
-            Max
-          </ButtonComponent>
-        </div>
-        <div className="w-[128px]">
-          <ButtonComponent
-            onClick={() => {
-              setTransactionData({
-                config: {
-                  address: vaultManagerAddress[defaultChain.id],
-                  abi: vaultManagerAbi,
-                  functionName: "mintDyad",
-                  args: [tokenId, mintInputValue, address],
-                },
-                description: `Mint ${fromBigNumber(mintInputValue)} DYAD decreasing collateralization ratio to ~${newCr.toString()}%`,
-              });
-              setMintInputValue("");
-            }}
-            disabled={!mintInputValue}
-          >
-            Mint
-          </ButtonComponent>
+        <div className="flex gap-4 mt-2 md:mt-0">
+          <div className="w-full md:w-[74px]">
+            <ButtonComponent variant="bordered" onClick={onMaxMintHandler}>
+              Max
+            </ButtonComponent>
+          </div>
+          <div className="w-full md:w-[128px]">
+            <ButtonComponent
+              onClick={() => {
+                setTransactionData({
+                  config: {
+                    address: vaultManagerAddress[defaultChain.id],
+                    abi: vaultManagerAbi,
+                    functionName: "mintDyad",
+                    args: [tokenId, mintInputValue, address],
+                  },
+                  description: `Mint ${fromBigNumber(mintInputValue)} DYAD decreasing collateralization ratio to ~${newCr.toString()}%`,
+                });
+                setMintInputValue("");
+              }}
+              disabled={!mintInputValue}
+            >
+              Mint
+            </ButtonComponent>
+          </div>
         </div>
       </div>
-      <div className="flex justify-between mt-[32px] w-full">
-        <div className="w-[380px] ">
+      <div className="block md:flex justify-between mt-[32px] w-full">
+        <div className="w-full md:w-[380px] ">
           <BigIntInput
             value={burnInputValue}
             onChange={(value) => setBurnInputValue(value)}
             placeholder="Amount of DYAD to burn..."
+            className="h-[45px] md:h-[39px] rounded-md md:rounded-r-none"
           />
         </div>
-        <div className="w-[74px]">
-          <ButtonComponent variant="bordered" onClick={onMaxBurnHandler}>
-            Max
-          </ButtonComponent>
-        </div>
-        <div className="w-[128px]">
-          <ButtonComponent
-            onClick={() => {
-              setTransactionData({
-                config: {
-                  address: vaultManagerAddress[defaultChain.id],
-                  abi: vaultManagerAbi,
-                  functionName: "burnDyad",
-                  args: [tokenId, burnInputValue],
-                },
-                description: `Burn ${fromBigNumber(burnInputValue)} DYAD to increase collateralization ratio to ~${newCr.toString()}%`,
-              });
-              setBurnInputValue("");
-            }}
-            disabled={!burnInputValue}
-          >
-            Burn
-          </ButtonComponent>
+        <div className="flex gap-4 mt-2 md:mt-0">
+          <div className="w-full md:w-[74px]">
+            <ButtonComponent variant="bordered" onClick={onMaxBurnHandler}>
+              Max
+            </ButtonComponent>
+          </div>
+          <div className="w-full md:w-[128px]">
+            <ButtonComponent
+              onClick={() => {
+                setTransactionData({
+                  config: {
+                    address: vaultManagerAddress[defaultChain.id],
+                    abi: vaultManagerAbi,
+                    functionName: "burnDyad",
+                    args: [tokenId, burnInputValue],
+                  },
+                  description: `Burn ${fromBigNumber(burnInputValue)} DYAD to increase collateralization ratio to ~${newCr.toString()}%`,
+                });
+                setBurnInputValue("");
+              }}
+              disabled={!burnInputValue}
+            >
+              Burn
+            </ButtonComponent>
+          </div>
         </div>
       </div>
-      <div className="flex justify-between mt-[32px]">
+      <div className="block md:flex justify-between mt-[32px]">
         <StackedValue
           description="DYAD minted"
           value={formatNumber(

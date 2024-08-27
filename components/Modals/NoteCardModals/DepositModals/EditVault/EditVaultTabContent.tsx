@@ -161,16 +161,21 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex justify-between gap-5 w-full">
-        <div className="w-5/6 ">
+      <div className="block md:flex justify-between gap-5 w-full mt-2 md:mt-0">
+        <div className="w-full md:w-5/6 ">
           <BigIntInput
             value={inputValue}
             onChange={(value) => setInputValue(value)}
             placeholder={`Amount of ${action === "redeem" ? "DYAD" : symbol} to ${action}...`}
+            className="h-[45px] md:h-[39px] rounded-md md:rounded-r-none"
           />
         </div>
-        <div className="w-[74px]">
-          <ButtonComponent onClick={maxHandler} variant="bordered">
+        <div className="w-full md:w-[74px]">
+          <ButtonComponent
+            onClick={maxHandler}
+            variant="bordered"
+            className="md:h-[39px] mt-2 md:mt-0"
+          >
             Max
           </ButtonComponent>
         </div>
@@ -179,27 +184,29 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
         !!contractData?.mintedDyad &&
         action !== "redeem" && (
           <div className="flex flex-col w-full justify-between font-semibold text-sm">
-            <div className="flex text-[#A1A1AA]">
+            <div className="flex justify-between text-[#A1A1AA]">
               <div className="mr-[5px]">Current collateralization ratio:</div>
               <p>{formatNumber(fromBigNumber(collateralizationRatio, 16))}%</p>
             </div>
-            <div className="flex">
+            <div className="flex justify-between ">
               <div className="mr-[5px] ">New collateralization ratio:</div>
-              <div>{formatNumber(newCr)}%</div>
+              <div className="max-w-[150px] md:max-w-fit break-words">
+                {formatNumber(newCr)}%
+              </div>
             </div>
           </div>
         )}
       {vaultAddress === keroseneVaultV2Address[defaultChain.id] && (
         <div>
           {xpBalanceOfNote !== undefined && xpTotalSupply !== undefined && (
-            <div className="flex justify-between text-sm gap-4">
-              <div className="flex gap-2 text-[#A1A1AA]">
+            <div className="block md:flex justify-between text-sm gap-4">
+              <div className="flex justify-between gap-2 text-[#A1A1AA]">
                 <div>XP: </div>
                 <div>
                   {(parseFloat(xpBalanceOfNote) / 1e18 / 1e9).toFixed(2)}
                 </div>
               </div>
-              <div className="flex gap-2 text-[#A1A1AA]">
+              <div className="flex justify-between gap-2 text-[#A1A1AA]">
                 <div>Accrual Rate: </div>
                 <div>
                   {((0.000000001 * fromBigNumber(contractData?.keroDeposited ?? 0n)) * 60 * 60 * 24).toFixed(
@@ -208,7 +215,7 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
                   / day
                 </div>
               </div>
-              <div className="flex gap-2 text-[#A1A1AA]">
+              <div className="flex justify-between gap-2 text-[#A1A1AA]">
                 <div>XP Share: </div>
                 <div>
                   {(
@@ -223,7 +230,7 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
           )}
         </div>
       )}
-      <div className="flex gap-8">
+      <div className="flex justify-between md:justify-start mt-4 md:mt-0 md:gap-8">
         {contractData?.allowance !== undefined &&
         contractData?.allowance < toBigNumber(inputValue, 0) &&
         action === "deposit" ? (
@@ -245,7 +252,7 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
             </ButtonComponent>
           </div>
         ) : (
-          <DialogClose>
+          <DialogClose className="w-full mr-2 md:mr-0">
             <ButtonComponent
               onClick={() => {
                 setTransactionData({
@@ -270,7 +277,7 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
           </DialogClose>
         )}
 
-        <DialogClose>
+        <DialogClose className="w-full ml-2 md:ml-0">
           <ButtonComponent variant="bordered">Cancel</ButtonComponent>
         </DialogClose>
       </div>
