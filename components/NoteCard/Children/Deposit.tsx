@@ -70,7 +70,7 @@ const Deposit: React.FC<DepositProps> = ({
           .map((vault, i) => (
             <Vault key={i} tokenId={tokenId} vault={vault} />
           ))}
-        {availableVaults &&
+        {availableVaults > 0 &&
           Array.apply(null, Array(availableVaults)).map((_, i) => (
             <AddVault
               key={i}
