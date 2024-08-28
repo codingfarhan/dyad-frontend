@@ -132,16 +132,16 @@ const MarketplaceList: React.FC<MarketplaceListProps> = ({ cardsData }) => {
 
             <div className="justify-between text-xs text-[#A1A1AA] tracking-wider flex md:hidden">
               <div className="block justify-between w-auto ">
-                <div className="mb-2">{data.xp} XP</div>
-                <div className="mb-2">{data.kerosene} KERO</div>
+                <div className="mb-2"><span className="text-white">{data.xp}</span> XP</div>
+                <div className="mb-2"><span className="text-white">{data.kerosene}</span> KERO</div>
               </div>
               <div className="block justify-between w-auto ">
-                <div className="mb-2">{data.xpPercentage} of XP</div>
-                <div className="mb-2">{data.collatRatio} CR</div>
+                <div className="mb-2"><span className="text-white">{data.xpPercentage}</span> of XP</div>
+                <div className="mb-2"><span className="text-white">{data.collatRatio}</span> CR</div>
               </div>
               <div className="block justify-between w-auto ">
-                <div className="mb-2">{data.dyad} DYAD</div>
-                <div className="mb-2">{data.collateral} Collateral</div>
+                <div className="mb-2"><span className="text-white">{data.dyad}</span> DYAD</div>
+                <div className="mb-2"><span className="text-white">{data.collateral}</span> Collateral</div>
               </div>
             </div>
 
