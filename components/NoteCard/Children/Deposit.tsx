@@ -46,7 +46,7 @@ const Deposit: React.FC<DepositProps> = ({
     .map((emptyVault, i) => (!emptyVault ? null : supportedVaults[i]))
     .filter((data) => !!data);
 
-  const availableVaults = 5 - emptyVaultMap.filter((data) => !data).length;
+  const availableVaults = 6 - emptyVaultMap.filter((data) => !data).length;
 
   return (
     <div className="w-full">
