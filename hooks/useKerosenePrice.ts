@@ -2,11 +2,12 @@ import useSWR from "swr";
 
 export default function useKerosenePrice() {
   const { data, error } = useSWR(
-    "https://api.coingecko.com/api/v3/coins/kerosene/tickers",
+    "https://api.dexscreener.com/latest/dex/search?q=KEROSENE%20WETH",
     async (url) => {
       const res = await fetch(url);
       const result = await res.json();
-      return result.tickers[0]?.converted_last?.usd || 0;
+      const priceUsd = result?.pairs?.[0]?.priceUsd;
+      return priceUsd ? parseFloat(priceUsd) : 0;
     }
   );
 
