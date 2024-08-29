@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -7,7 +7,7 @@ import useTvl from "@/hooks/useTvl";
 import useKerosenePrice from "@/hooks/useKerosenePrice";
 import { useReadKeroseneVaultV2AssetPrice } from "@/generated";
 import { fromBigNumber } from "@/lib/utils";
-import React from 'react';
+import React from "react";
 import useWindowSize from "@/hooks/useWindowSize";
 
 export const MainNav = React.memo(function MainNav({
@@ -100,8 +100,15 @@ export const MainNav = React.memo(function MainNav({
             <div className="ml-1">{kerosenePriceDisplay}</div>
           </a>
           <div className="flex w-1/2 justify-center">
-            <div className="font-semibold">DV:</div>
-            <div className="ml-1">{keroseneVaultDisplay}</div>
+            <a
+              href="https://dune.com/coffeexcoin/dyad-stable-v2"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex w-1/2 justify-center"
+            >
+              <div className="font-semibold">DV:</div>
+              <div className="ml-1">{keroseneVaultDisplay}</div>
+            </a>
           </div>
         </div>
       </div>
@@ -110,4 +117,5 @@ export const MainNav = React.memo(function MainNav({
       </div>
     </nav>
   );
-})
+});
+
