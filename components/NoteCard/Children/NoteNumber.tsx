@@ -15,11 +15,11 @@ const NoteNumber: React.FC<NoteNumberProps> = ({ data, dyad, collateral }) => {
   const dyadData = [
     {
       label: "DYAD mintable",
-      value: dyad[0],
+      value: Math.ceil(dyad[0]),
     },
     {
       label: "DYAD minted",
-      value: dyad[1],
+      value: Math.ceil(dyad[1]),
     },
   ];
 

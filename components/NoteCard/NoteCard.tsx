@@ -172,7 +172,7 @@ function NoteCard({ tokenId }: { tokenId: string }) {
 
   // Calculate total DYAD
   const totalDyad = contractData?.mintedDyad
-    ? `${fromBigNumber(contractData.mintedDyad)}`
+    ? `${Math.floor(fromBigNumber(contractData.mintedDyad))}`
     : "N/A";
 
   // Calculate mintable DYAD
