@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 type MerklCampaign = {
   apr: number;
   tvl: number;
-  isLive: boolean;
 };
 
 export const useMerklCampaign = () => {
@@ -16,7 +15,7 @@ export const useMerklCampaign = () => {
     async function getMerkl() {
       try {
         const res = await fetch(
-          "https://api.merkl.xyz/v3/campaigns?chainIds=1"
+          "https://api.merkl.xyz/v3/opportunity?campaigns=false&testTokens=false"
         );
 
         if (!res.ok) {
@@ -29,15 +28,10 @@ export const useMerklCampaign = () => {
           throw new Error("No data returned from API");
         }
 
-        const campaigns =
-          data["1"]["2_0x8B238f615c1f312D22A65762bCf601a37f1EeEC7"];
-
-        for (const campaign of Object.values(campaigns) as MerklCampaign[]) {
-          if (campaign.isLive) {
-            setMerkleData(campaign);
-            break;
-          }
-        }
+        const pool =
+          data["2_0x8B238f615c1f312D22A65762bCf601a37f1EeEC7"] as MerklCampaign;
+          
+        setMerkleData(pool);
       } catch (err) {
         setError((err as Error).message);
       }
