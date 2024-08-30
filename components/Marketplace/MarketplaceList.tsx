@@ -30,6 +30,7 @@ const MarketplaceList: React.FC<MarketplaceListProps> = ({
     let sortableRows = [...cardsData];
     sortableRows.sort((a, b) => {
       const aId = parseValue(getKeyValue(a, "id"));
+      const bId = parseValue(getKeyValue(b, "id"));
       const aValue = parseValue(getKeyValue(a, sortConfig.key));
       const bValue = parseValue(getKeyValue(b, sortConfig.key));
 
@@ -38,6 +39,8 @@ const MarketplaceList: React.FC<MarketplaceListProps> = ({
 
       if (ownedNotes.has(aId)) {
         return -1;
+      } else if (ownedNotes.has(bId)) {
+        return 1;
       }
 
       if (aValue > bValue) {
