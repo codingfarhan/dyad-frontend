@@ -6,9 +6,13 @@ import { ArrowDownUpIcon, ArrowUpIcon } from "lucide-react";
 
 interface MarketplaceListProps {
   cardsData: any;
+  ownedNotes: Set<number>;
 }
 
-const MarketplaceList: React.FC<MarketplaceListProps> = ({ cardsData }) => {
+const MarketplaceList: React.FC<MarketplaceListProps> = ({
+  cardsData,
+  ownedNotes,
+}) => {
   const [sortConfig, setSortConfig] = useState<{
     key: string;
     direction: string;
@@ -25,11 +29,19 @@ const MarketplaceList: React.FC<MarketplaceListProps> = ({ cardsData }) => {
   const sortedRows = React.useMemo(() => {
     let sortableRows = [...cardsData];
     sortableRows.sort((a, b) => {
+      const aId = parseValue(getKeyValue(a, "id"));
+      const bId = parseValue(getKeyValue(b, "id"));
       const aValue = parseValue(getKeyValue(a, sortConfig.key));
       const bValue = parseValue(getKeyValue(b, sortConfig.key));
 
       if (!aValue) return 1;
       if (!bValue) return -1;
+
+      if (ownedNotes.has(aId)) {
+        return -1;
+      } else if (ownedNotes.has(bId)) {
+        return 1;
+      }
 
       if (aValue > bValue) {
         // Check if we're sorting by rank and reversing the asc and desc values because a lower rank is better
@@ -48,6 +60,7 @@ const MarketplaceList: React.FC<MarketplaceListProps> = ({ cardsData }) => {
       }
       return 0;
     });
+
     return sortableRows;
   }, [cardsData, sortConfig]);
 
@@ -132,16 +145,29 @@ const MarketplaceList: React.FC<MarketplaceListProps> = ({ cardsData }) => {
 
             <div className="justify-between text-xs text-[#A1A1AA] tracking-wider flex md:hidden">
               <div className="block justify-between w-auto ">
-                <div className="mb-2"><span className="text-white">{data.xp}</span> XP</div>
-                <div className="mb-2"><span className="text-white">{data.kerosene}</span> KERO</div>
+                <div className="mb-2">
+                  <span className="text-white">{data.xp}</span> XP
+                </div>
+                <div className="mb-2">
+                  <span className="text-white">{data.kerosene}</span> KERO
+                </div>
               </div>
               <div className="block justify-between w-auto ">
-                <div className="mb-2"><span className="text-white">{data.xpPercentage}</span> of XP</div>
-                <div className="mb-2"><span className="text-white">{data.collatRatio}</span> CR</div>
+                <div className="mb-2">
+                  <span className="text-white">{data.xpPercentage}</span> of XP
+                </div>
+                <div className="mb-2">
+                  <span className="text-white">{data.collatRatio}</span> CR
+                </div>
               </div>
               <div className="block justify-between w-auto ">
-                <div className="mb-2"><span className="text-white">{data.dyad}</span> DYAD</div>
-                <div className="mb-2"><span className="text-white">{data.collateral}</span> Collateral</div>
+                <div className="mb-2">
+                  <span className="text-white">{data.dyad}</span> DYAD
+                </div>
+                <div className="mb-2">
+                  <span className="text-white">{data.collateral}</span>{" "}
+                  Collateral
+                </div>
               </div>
             </div>
 

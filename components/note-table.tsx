@@ -170,7 +170,6 @@ const NoteTable: React.FC<any> = ({}) => {
 
   const parsedData = useMemo(() => {
     const parseRows = (items: any) => {
-      const ownedDnftSet = new Set(ownedDnfts?.map(Number) || []);
       return (
         items
           //.filter((item: any) => parseFloat(item.dyad) !== 0)
@@ -203,13 +202,6 @@ const NoteTable: React.FC<any> = ({}) => {
             rank: index + 1,
             ...getMarketplaceData(item.id),
           }))
-          .sort((a: any, b: any) => {
-            if (ownedDnftSet.has(Number(a.id))) {
-              return -1;
-            } else {
-              return a.rank - b.rank;
-            }
-          })
       );
     };
 
@@ -271,7 +263,7 @@ const NoteTable: React.FC<any> = ({}) => {
         }}
       />
       {loading && <Loader />}
-      {!loading && !error && <MarketplaceList cardsData={parsedData} />}
+      {!loading && !error && <MarketplaceList cardsData={parsedData} ownedNotes={new Set(ownedDnfts?.map(Number) || [])} />}
       {!loading && !error && (
         <div className="flex justify-end mt-4 text-sm text-muted-foreground">
           *only Notes that minted DYAD are ranked
