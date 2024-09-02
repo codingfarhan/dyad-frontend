@@ -18,16 +18,19 @@ import { defaultChain } from "@/lib/config";
 type ColorCode = `#${string}`
 
 export type VaultInfo = {
+  icon: string;
   vaultAddress: `0x${string}`;
   symbol: string;
   tokenAddress: `0x${string}`;
   color: ColorCode;
   decimals: number;
   getApr?: () => Promise<number>;
+  additionalYield?: string;
 };
 
 export const vaultInfo: VaultInfo[] = [
   {
+    icon: "/weth.png",
     vaultAddress: wEthVaultAddress[defaultChain.id],
     symbol: "wETH",
     tokenAddress: wethAddress[defaultChain.id],
@@ -35,6 +38,7 @@ export const vaultInfo: VaultInfo[] = [
     decimals: 8
   },
   {
+    icon: "/wsteth.png",
     vaultAddress: wstEthVaultAddress[defaultChain.id],
     symbol: "wstETH",
     tokenAddress: wstEthAddress[defaultChain.id],
@@ -47,6 +51,7 @@ export const vaultInfo: VaultInfo[] = [
     }
   },
   {
+    icon: "/kerosene.png",
     vaultAddress: keroseneVaultV2Address[defaultChain.id],
     symbol: "KEROSENE",
     tokenAddress: keroseneAddress[defaultChain.id],
@@ -54,6 +59,7 @@ export const vaultInfo: VaultInfo[] = [
     decimals: 8
   },
   {
+    icon: "/tbtc.svg",
     vaultAddress: tBtcVaultAddress[defaultChain.id],
     symbol: "tBTC",
     tokenAddress: tBtcAddress[defaultChain.id],
@@ -61,6 +67,7 @@ export const vaultInfo: VaultInfo[] = [
     decimals: 8
   },
   {
+    icon: "/susde.svg",
     vaultAddress: sUsDeVaultAddress[defaultChain.id],
     symbol: "sUSDe",
     tokenAddress: sUsDeAddress[defaultChain.id],
@@ -73,6 +80,7 @@ export const vaultInfo: VaultInfo[] = [
     },
   },
   {
+    icon: "/weeth.svg",
     vaultAddress: weEthVaultAddress[defaultChain.id],
     symbol: "weETH",
     tokenAddress: weEthAddress[defaultChain.id],
@@ -84,6 +92,7 @@ export const vaultInfo: VaultInfo[] = [
         const lastValue = data.latest_aprs.slice(-1);
         const apr = parseFloat(lastValue) / 0.9 / 100;
         return apr;
-    }
+    },
+    additionalYield: "3x EtherFi Points"
   }
 ];
