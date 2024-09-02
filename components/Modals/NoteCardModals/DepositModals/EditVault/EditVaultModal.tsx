@@ -5,10 +5,15 @@ import React, { useState } from "react";
 interface EditVaultModalProps {
   tabsData: TabsDataModel[];
   logo: string;
+  selectedTab?: "Deposit" | "Withdraw";
 }
 
-const EditVaultModal: React.FC<EditVaultModalProps> = ({ tabsData, logo }) => {
-  const [selected, setSelected] = useState();
+const EditVaultModal: React.FC<EditVaultModalProps> = ({
+  tabsData,
+  logo,
+  selectedTab = "Deposit",
+}) => {
+  const [selected, setSelected] = useState(selectedTab);
   return (
     <TabsComponent
       tabsData={tabsData}
