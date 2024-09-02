@@ -19,6 +19,7 @@ import AddVaultModal from "@/components/Modals/NoteCardModals/DepositModals/AddV
 import Image from "next/image";
 import { useCallback, useState } from "react";
 import { vaultAbi } from "@/lib/abi/Vault";
+import { Tooltip } from "@nextui-org/react";
 
 interface DepositProps {
   tokenId: string;
@@ -375,24 +376,28 @@ const Vault = ({
         <div className="col-span-2 ">{assetYield}</div>
         <div className="col-span-1 ">
           <div className="flex justify-between">
-            <div
-              className="cursor-pointer ml-auto h-6 w-6 rounded-[50%] bg-[#1A1A1A] flex"
-              onClick={() => {
-                setIsVaultModalOpen(true);
-                setSelectedEditVaultTab("Withdraw");
-              }}
-            >
-              <div className="m-auto">-</div>
-            </div>
-            <div
-              className="cursor-pointer ml-auto h-6 w-6 rounded-[50%] bg-[#1A1A1A] flex"
-              onClick={() => {
-                setIsVaultModalOpen(true);
-                setSelectedEditVaultTab("Deposit");
-              }}
-            >
-              <div className="m-auto">+</div>
-            </div>
+            <Tooltip content="Withdraw" closeDelay={200}>
+              <div
+                className="cursor-pointer ml-auto h-6 w-6 rounded-[50%] bg-[#1A1A1A] flex hover:scale-110 transition-[scale]"
+                onClick={() => {
+                  setIsVaultModalOpen(true);
+                  setSelectedEditVaultTab("Withdraw");
+                }}
+              >
+                <div className="m-auto">-</div>
+              </div>
+            </Tooltip>
+            <Tooltip content="Deposit" closeDelay={200}>
+              <div
+                className="cursor-pointer ml-auto h-6 w-6 rounded-[50%] bg-[#1A1A1A] flex hover:scale-110 transition-[scale]"
+                onClick={() => {
+                  setIsVaultModalOpen(true);
+                  setSelectedEditVaultTab("Deposit");
+                }}
+              >
+                <div className="m-auto">+</div>
+              </div>
+            </Tooltip>
           </div>
         </div>
       </div>
