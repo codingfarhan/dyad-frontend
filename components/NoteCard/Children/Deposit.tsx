@@ -9,7 +9,7 @@ import {
 } from "@/generated";
 import { defaultChain } from "@/lib/config";
 import { useReadContract, useReadContracts } from "wagmi";
-import { Address, maxUint256 } from "viem";
+import { Address, formatEther, maxUint256 } from "viem";
 import { formatNumber, fromBigNumber } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
@@ -25,6 +25,8 @@ import {
   DropdownTrigger,
 } from "@nextui-org/react";
 import { DotsVerticalIcon } from "@radix-ui/react-icons";
+import { useCallback, useEffect } from "react";
+import { vaultAbi } from "@/lib/abi/Vault";
 
 interface DepositProps {
   tokenId: string;
@@ -48,6 +50,35 @@ const Deposit: React.FC<DepositProps> = ({
       chainId: defaultChain.id,
     })),
     allowFailure: false,
+  });
+
+  const { data: vaultAssets } = useReadContracts({
+    contracts: supportedVaults.map((address) => ([{
+      address,
+      abi: vaultAbi,
+      functionName: "id2asset",
+      args: [BigInt(tokenId)],
+      chainId: defaultChain.id,
+    }, {
+      address,
+      abi: vaultAbi,
+      functionName: "getUsdValue",
+      args: [BigInt(tokenId)],
+      chainId: defaultChain.id,
+    }])).flatMap((contract) => contract),
+    allowFailure: false,
+    query: {
+      select: (data) => {
+        const result: Record<string, { asset: string, usdValue: string }> = {};
+        for (let i = 0; i < data.length; i += 2) {
+          const asset = Number(formatEther(data[i] as bigint)).toFixed(4);
+          const usdValue = Number(formatEther(data[i + 1] as bigint)).toFixed(2);
+          result[supportedVaults[i / 2]] = { asset, usdValue };
+        }
+        console.log(result);
+        return result;
+      }
+    },
   });
 
   const emptyVaultMap = vaultData?.map((data) => !data) || [];
@@ -80,51 +111,6 @@ const Deposit: React.FC<DepositProps> = ({
     },
   ];
 
-  const dummyVaultData = [
-    {
-      currencyIcon: <Image src={bitcoinIcon} alt="bitcoin icon" width={20} />,
-      currency: "wETH",
-      tokensDeposited: 12,
-      totalValueUsd: 30000,
-      assetYield: "2.8% APY + 3x etherFi points",
-    },
-    // {
-    //   currencyIcon: <Image src={bitcoinIcon} alt="bitcoin icon" width={20} />,
-    //   currency: "wstETH",
-    //   tokensDeposited: 3,
-    //   totalValueUsd: 3000,
-    //   assetYield: "2.8% APY + 3x etherFi points",
-    // },
-    // {
-    //   currencyIcon: <Image src={bitcoinIcon} alt="bitcoin icon" width={20} />,
-    //   currency: "KEROSENE",
-    //   tokensDeposited: 5,
-    //   totalValueUsd: 10000,
-    //   assetYield: "2.8% APY",
-    // },
-    // {
-    //   currencyIcon: <Image src={bitcoinIcon} alt="bitcoin icon" width={20} />,
-    //   currency: "tBTC",
-    //   tokensDeposited: 10,
-    //   totalValueUsd: 50000,
-    //   assetYield: "2.8% APY + 3x etherFi points",
-    // },
-    // {
-    //   currencyIcon: <Image src={bitcoinIcon} alt="bitcoin icon" width={20} />,
-    //   currency: "sUSDe",
-    //   tokensDeposited: 8,
-    //   totalValueUsd: 8000,
-    //   assetYield: "2.8% APY + 3x etherFi points",
-    // },
-    // {
-    //   currencyIcon: <Image src={bitcoinIcon} alt="bitcoin icon" width={20} />,
-    //   currency: "weETH",
-    //   tokensDeposited: 15,
-    //   totalValueUsd: 5000,
-    //   assetYield: "2.8% APY",
-    // },
-  ];
-
   const actionItems = [
     {
       label: "Deposit",
@@ -137,7 +123,27 @@ const Deposit: React.FC<DepositProps> = ({
     },
   ];
 
-  const renderVaultTable = (vaultData: any) => {
+  const getYield = useCallback(async (vault: VaultInfo) => {
+    let apr = undefined;
+    if (vault.getApr) {
+      try {
+        const aprValue = await vault.getApr();
+        if (aprValue) {
+          apr = `${aprValue.toFixed(2)}%`
+        }
+      }
+      catch {
+        
+      }
+    }
+    return [apr, vault.additionalYield].filter(item => item !== undefined).join(" + ");
+  }, [])
+
+  useEffect(() => {
+    console.log(vaultAssets);
+  }, [vaultAssets])
+
+  const renderVaultTable = (vaultData: VaultInfo[]) => {
     return (
       <div>
         <div className="hidden justify-between text-xs tracking-wider md:grid md:grid-cols-9 md:gap-x-2 mt-2 py-2 px-2 sticky top-0">
@@ -151,15 +157,15 @@ const Deposit: React.FC<DepositProps> = ({
           ))}
         </div>
         <div className="mt-2 grid grid-cols-1 gap-y-2 ">
-          {vaultData.map((data: any) => (
-            <div className="bg-[#282828] rounded rounded-lg p-2">
+          {vaultData.map((data: VaultInfo) => (
+            <div className="bg-[#282828] rounded rounded-lg p-2" key={data.tokenAddress}>
               <div className="md:hidden justify-between mb-4 flex">
                 <div className=" my-auto flex">
                   <div className="text-xs text-[#A1A1AA] my-auto">
-                    {data.currencyIcon}
+                    <Image src={data.icon} width={20} height={20} alt={`${data.symbol} icon`} />
                   </div>
                   <div className="text-md ml-2 flex font-bold">
-                    {data.currency}
+                    {data.symbol}
                   </div>
                 </div>
                 <div className="my-auto">
@@ -188,20 +194,20 @@ const Deposit: React.FC<DepositProps> = ({
                   <div className="mb-2 flex justify-between">
                     <div>Tokens deposited</div>
                     <div className="flex text-white">
-                      <div>{data.tokensDeposited}</div>
-                      <div className="ml-1">{data.currency}</div>
+                      <div>{vaultAssets?.[data.vaultAddress]?.asset}</div>
+                      <div className="ml-1">{data.symbol}</div>
                     </div>
                   </div>
                   <div className="mb-2 flex justify-between">
                     <div>Total value (USD)</div>
                     <div className="text-white">
-                      <span>${data.totalValueUsd}</span>
+                      <span>{vaultAssets?.[data.vaultAddress]?.usdValue}</span>
                     </div>
                   </div>
                   <div className="mb-2 flex justify-between">
                     <div>Asset yield</div>
                     <div className="text-white w-1/2 text-right">
-                      <span>{data.assetYield}</span>
+                      <span>{getYield(data)}</span>
                     </div>
                   </div>
                 </div>
@@ -209,15 +215,17 @@ const Deposit: React.FC<DepositProps> = ({
 
               <div className="hidden justify-between text-xs tracking-wider md:grid md:grid-cols-9 md:gap-x-2 text-center items-center h-9">
                 <div className="col-span-2 flex pl-2 items-center">
-                  <div>{data.currencyIcon}</div>
-                  <div className="ml-2">{data.currency}</div>
+                  <div>
+                    <Image src={data.icon} width={20} height={20} alt={`${data.symbol} icon`} />
+                  </div>
+                  <div className="ml-2">{data.symbol}</div>
                 </div>
                 <div className="col-span-2 flex justify-center">
-                  <div>{data.tokensDeposited}</div>
-                  <div className="ml-2">{data.currency}</div>
+                <div>{vaultAssets?.[data.vaultAddress]?.asset}</div>
+                  <div className="ml-2">{data.symbol}</div>
                 </div>
-                <div className="col-span-2 ">${data.totalValueUsd}</div>
-                <div className="col-span-2 ">{data.assetYield}</div>
+                <div className="col-span-2 ">${vaultAssets?.[data.vaultAddress]?.usdValue}</div>
+                <div className="col-span-2 ">{getYield(data)}</div>
                 <div className="col-span-1 ">
                   <Dropdown>
                     <DropdownTrigger>
@@ -269,7 +277,7 @@ const Deposit: React.FC<DepositProps> = ({
           </p>
         </div>
       </div>
-      {renderVaultTable(dummyVaultData)}
+      {renderVaultTable(vaultInfo)}
       {/* <div className="grid grid-cols-1 md:grid-cols-5 gap-2 md:gap-[30px]">
         {vaultInfo
           .filter((_, i) => !!vaultData?.at(i))
