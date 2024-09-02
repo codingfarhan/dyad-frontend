@@ -17,7 +17,7 @@ import { TabsDataModel } from "@/models/TabsModel";
 import { VaultInfo, vaultInfo } from "@/lib/constants";
 import AddVaultModal from "@/components/Modals/NoteCardModals/DepositModals/AddVault/AddVaultModal";
 import Image from "next/image";
-import { useCallback, useState } from "react";
+import { useEffect, useState } from "react";
 import { vaultAbi } from "@/lib/abi/Vault";
 import { Tooltip } from "@nextui-org/react";
 
@@ -111,8 +111,10 @@ const Deposit: React.FC<DepositProps> = ({
     },
   ];
 
-  const getYield = useCallback(
-    async (vault: VaultInfo): Promise<string | undefined> => {
+  const [assetYields, setAssetYields] = useState();
+
+  const getYields = async () => {
+    const yields = await vaultInfo.map(async (vault) => {
       let apr = undefined;
       if (vault.getApr) {
         try {
@@ -122,12 +124,21 @@ const Deposit: React.FC<DepositProps> = ({
           }
         } catch {}
       }
-      return [apr, vault.additionalYield]
-        .filter((item) => item !== undefined)
-        .join(" + ");
-    },
-    []
-  );
+
+      setAssetYields((prevState: any) => ({
+        ...prevState,
+        [vault.vaultAddress]: [apr, vault.additionalYield]
+          .filter((item) => item !== undefined)
+          .join(" + "),
+      }));
+    });
+
+    return yields;
+  };
+
+  useEffect(() => {
+    getYields();
+  }, []);
 
   const renderVaultTable = (vaultData: VaultInfo[]) => {
     return (
@@ -145,15 +156,17 @@ const Deposit: React.FC<DepositProps> = ({
         <div className="mt-2 grid grid-cols-1 gap-y-2">
           {vaultInfo
             .filter((_, i) => !!vaultData?.at(i))
-            .map((vault, i) => (
-              <Vault
-                key={i}
-                tokenId={tokenId}
-                vault={vault}
-                assetYield={getYield(vault)}
-                vaultAssets={vaultAssets}
-              />
-            ))}
+            .map((vault, i) => {
+              return (
+                <Vault
+                  key={i}
+                  tokenId={tokenId}
+                  vault={vault}
+                  assetYield={assetYields && assetYields[vault.vaultAddress]}
+                  vaultAssets={vaultAssets}
+                />
+              );
+            })}
         </div>
         {availableVaults > 0 &&
           Array.apply(null, Array(availableVaults)).map((_, i) => (
@@ -197,7 +210,7 @@ const Vault = ({
 }: {
   vault: VaultInfo;
   tokenId: string;
-  assetYield: Promise<string | undefined>;
+  assetYield: string | undefined;
   vaultAssets:
     | Record<
         string,
