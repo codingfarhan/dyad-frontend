@@ -28,7 +28,6 @@ import {
   DropdownItem,
 } from "@nextui-org/react";
 import { Menu } from "lucide-react";
-import { color } from "framer-motion";
 
 type ContractData = {
   collatRatio?: bigint;
@@ -135,7 +134,7 @@ function NoteCard({ tokenId }: { tokenId: string }) {
       allowFailure: false,
     });
 
-    const { data: tokenCollateral, isError: tokenCollateralError } =
+  const { data: tokenCollateral, isError: tokenCollateralError } =
     useReadContracts({
       contracts: supportedVaults.map((address) => ({
         address: address,
