@@ -110,20 +110,23 @@ const Deposit: React.FC<DepositProps> = ({
     },
   ];
 
-  const getYield = useCallback(async (vault: VaultInfo) => {
-    let apr = undefined;
-    if (vault.getApr) {
-      try {
-        const aprValue = await vault.getApr();
-        if (aprValue) {
-          apr = `${aprValue.toFixed(2)}%`;
-        }
-      } catch {}
-    }
-    return [apr, vault.additionalYield]
-      .filter((item) => item !== undefined)
-      .join(" + ");
-  }, []);
+  const getYield = useCallback(
+    async (vault: VaultInfo): Promise<string | undefined> => {
+      let apr = undefined;
+      if (vault.getApr) {
+        try {
+          const aprValue = await vault.getApr();
+          if (aprValue) {
+            apr = `${aprValue.toFixed(2)}%`;
+          }
+        } catch {}
+      }
+      return [apr, vault.additionalYield]
+        .filter((item) => item !== undefined)
+        .join(" + ");
+    },
+    []
+  );
 
   const renderVaultTable = (vaultData: VaultInfo[]) => {
     return (
@@ -193,8 +196,16 @@ const Vault = ({
 }: {
   vault: VaultInfo;
   tokenId: string;
-  assetYield: any;
-  vaultAssets: any;
+  assetYield: Promise<string | undefined>;
+  vaultAssets:
+    | Record<
+        string,
+        {
+          asset: string;
+          usdValue: string;
+        }
+      >
+    | undefined;
 }) => {
   const [isEditVaultModalOpen, setIsVaultModalOpen] = useState<boolean>(false);
   const [selectedEditVaultTab, setSelectedEditVaultTab] = useState<
