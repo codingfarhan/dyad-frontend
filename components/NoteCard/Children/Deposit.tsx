@@ -350,7 +350,6 @@ const Vault = ({
             <div>Tokens deposited</div>
             <div className="flex text-white">
               <div>{vaultAssets?.[vault.vaultAddress]?.asset}</div>
-              <div className="ml-1">{vault.symbol}</div>
             </div>
           </div>
           <div className="mb-2 flex justify-between">
@@ -381,7 +380,6 @@ const Vault = ({
         </div>
         <div className="col-span-2 flex justify-center">
           <div>{vaultAssets?.[vault.vaultAddress]?.asset}</div>
-          <div className="ml-2">{vault.symbol}</div>
         </div>
         <div className="col-span-2 ">
           ${vaultAssets?.[vault.vaultAddress]?.usdValue}
