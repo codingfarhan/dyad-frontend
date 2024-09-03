@@ -235,7 +235,7 @@ export function EarnKeroseneContent() {
                     <ButtonComponent
                       onClick={() => {
                         window.open(
-                          `https://merkl.angle.money/ethereum/pool/0x8B238f615c1f312D22A65762bCf601a37f1EeEC7?campaignId=${merklData?.campaignId}`
+                          `https://merkl.angle.money/ethereum/pool/0x8B238f615c1f312D22A65762bCf601a37f1EeEC7`
                         );
                       }}
                     >

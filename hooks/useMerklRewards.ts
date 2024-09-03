@@ -19,12 +19,11 @@ export const useMerklRewards = ({ address }: { address: `0x${string}` | undefine
     const getMerklRewards = useCallback(async (address: `0x${string}`) => {
         setLoading(true);
         try {
-            const res = await fetch(`https://api.merkl.xyz/v3/rewards?user=${address}&chainIds=1`);
+            const res = await fetch(`https://api.merkl.xyz/v3/userRewards?user=${address}&chainId=1&rewardToken=0xf3768D6e78E65FC64b8F12ffc824452130BD5394&proof=true`);
             const data = await res.json()
 
-            const rewards = data["1"].tokenData[keroseneAddress[defaultChain.id]];
+            const rewards = data["0xf3768D6e78E65FC64b8F12ffc824452130BD5394"];
 
-            console.log(rewards)
             if (rewards) {
                 setMerklRewards({
                     accumulated: BigInt(rewards.accumulated),
