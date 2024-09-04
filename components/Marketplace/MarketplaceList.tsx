@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SortbyComponent from "../reusable/SortbyComponent";
 import { getKeyValue } from "@nextui-org/react";
 import { cardsSortData } from "@/constants/MarketplaceList";
 import { ArrowDownUpIcon, ArrowUpIcon } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface MarketplaceListProps {
   cardsData: any;
@@ -17,6 +18,8 @@ const MarketplaceList: React.FC<MarketplaceListProps> = ({
     key: string;
     direction: string;
   }>({ key: "rank", direction: "descending" });
+  const [isModalOpen, setIsModalOpen] = useState(false); // new state
+  const [selectedRow, setSelectedRow] = useState<any>(null); // new state
 
   const parseValue = (value: string) => {
     if (value === undefined || value === "") return 0;
@@ -70,6 +73,11 @@ const MarketplaceList: React.FC<MarketplaceListProps> = ({
     });
   };
 
+  const handleRowClick = (data: any) => { // new function
+    setSelectedRow(data);
+    setIsModalOpen(true);
+  };
+
   return (
     <>
       <div className="w-full ml-auto flex justify-end">
@@ -118,7 +126,10 @@ const MarketplaceList: React.FC<MarketplaceListProps> = ({
       </div>
       <div className="mt-2 grid grid-cols-1 gap-y-2 ">
         {sortedRows.map((data: any) => (
-          <div className="bg-[#1A1A1A] rounded rounded-lg p-2">
+          <div 
+            className="bg-[#1A1A1A] rounded rounded-lg p-2 cursor-pointer hover:bg-[#2A2A2A]"
+            onClick={() => handleRowClick(data)} // updated to handle click
+          >
             <div className="md:hidden justify-between mb-4 flex">
               <div>
                 <div className="text-lg flex font-bold">Rank #{data.rank}</div>
@@ -207,6 +218,20 @@ const MarketplaceList: React.FC<MarketplaceListProps> = ({
           </div>
         ))}
       </div>
+
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}> {/* new Dialog component */}
+        <DialogContent>
+          {selectedRow && (
+            <div>
+              <h2>Details for Note Nº {selectedRow.id}</h2>
+              <p>Rank: {selectedRow.rank}</p>
+              <p>XP: {selectedRow.xp}</p>
+              {/* Add more details as needed */}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       <a
         href="#"
         className="bg-[#1A1A1A] border-[1px] border-[#282828] rounded-[100%] w-[50px] h-[50px] fixed top-[90vh] right-[5vw] cursor-pointer flex"
