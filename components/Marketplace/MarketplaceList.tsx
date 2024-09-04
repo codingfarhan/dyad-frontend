@@ -1,9 +1,9 @@
-import React, {useState, useEffect} from "react";
+import React, { useState } from "react";
 import SortbyComponent from "../reusable/SortbyComponent";
-import {getKeyValue} from "@nextui-org/react";
-import {cardsSortData} from "@/constants/MarketplaceList";
-import {ArrowDownUpIcon, ArrowUpIcon} from "lucide-react";
-import {Dialog, DialogContent} from "@/components/ui/dialog";
+import { getKeyValue, Pagination } from "@nextui-org/react";
+import { cardsSortData } from "@/constants/MarketplaceList";
+import { ArrowDownUpIcon, ArrowUpIcon } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import NoteDetails from "./NoteDetails"; // Import the new component
 
 interface MarketplaceListProps {
@@ -18,9 +18,11 @@ const MarketplaceList: React.FC<MarketplaceListProps> = ({
   const [sortConfig, setSortConfig] = useState<{
     key: string;
     direction: string;
-  }>({key: "rank", direction: "descending"});
+  }>({ key: "rank", direction: "descending" });
   const [isModalOpen, setIsModalOpen] = useState(false); // new state
   const [selectedRow, setSelectedRow] = useState<any>(null); // new state
+  const pageSize = 10; // max rows per page
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
   const parseValue = (value: string) => {
     if (value === undefined || value === "") return 0;
@@ -65,16 +67,22 @@ const MarketplaceList: React.FC<MarketplaceListProps> = ({
       return 0;
     });
 
-    return sortableRows;
+    const result: string[][] = [];
+    const pages = Math.ceil(sortableRows?.length / pageSize);
+    for (let i = 0; i < pages; i++) {
+      result.push(sortableRows?.slice(i * pageSize, (i + 1) * pageSize));
+    }
+    return result;
   }, [cardsData, sortConfig]);
 
   const requestSort = (key: string) => {
     setSortConfig((oldValue) => {
-      return {key, direction: oldValue.direction};
+      return { key, direction: oldValue.direction };
     });
   };
 
-  const handleRowClick = (data: any) => { // new function
+  const handleRowClick = (data: any) => {
+    // new function
     setSelectedRow(data);
     setIsModalOpen(true);
   };
@@ -92,8 +100,8 @@ const MarketplaceList: React.FC<MarketplaceListProps> = ({
         <div className="w-16 ml-2">
           <SortbyComponent
             sortOptions={[
-              {label: "Ascending", value: "ascending"},
-              {label: "Descending", value: "descending"},
+              { label: "Ascending", value: "ascending" },
+              { label: "Descending", value: "descending" },
             ]}
             onValueChange={() =>
               setSortConfig((prevState) => ({
@@ -126,7 +134,7 @@ const MarketplaceList: React.FC<MarketplaceListProps> = ({
         <div className="col-span-2 mt-auto mb-auto">Market</div>
       </div>
       <div className="mt-2 grid grid-cols-1 gap-y-2 ">
-        {sortedRows.map((data: any) => (
+        {sortedRows[currentPage - 1].map((data: any) => (
           <div
             className="bg-[#1A1A1A] rounded rounded-lg p-2 cursor-pointer hover:bg-[#2A2A2A]"
             onClick={() => handleRowClick(data)} // updated to handle click
@@ -219,10 +227,28 @@ const MarketplaceList: React.FC<MarketplaceListProps> = ({
           </div>
         ))}
       </div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          width: "100%",
+          marginTop: "10px",
+        }}
+      >
+        <Pagination
+          isCompact
+          showControls
+          showShadow
+          total={sortedRows?.length}
+          initialPage={1}
+          onChange={setCurrentPage}
+        />
+      </div>
 
       {selectedRow && (
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <NoteDetails selectedRow={selectedRow} /> {/* Use the new component */}
+          <NoteDetails selectedRow={selectedRow} />{" "}
+          {/* Use the new component */}
         </Dialog>
       )}
 
