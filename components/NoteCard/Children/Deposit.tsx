@@ -1,25 +1,15 @@
-import EditVaultModal from "@/components/Modals/NoteCardModals/DepositModals/EditVault/EditVaultModal";
-import EditVaultTabContent from "@/components/Modals/NoteCardModals/DepositModals/EditVault/EditVaultTabContent";
-import {
-  useReadVaultManagerCollatRatio,
-  useReadVaultManagerHasVault,
-  vaultManagerAbi,
-  vaultManagerAddress,
-  wEthVaultAbi,
-} from "@/generated";
+import { vaultManagerAbi, vaultManagerAddress } from "@/generated";
 import { defaultChain } from "@/lib/config";
-import { useReadContract, useReadContracts } from "wagmi";
+import { useReadContracts } from "wagmi";
 import { Address, formatEther, maxUint256 } from "viem";
 import { formatNumber, fromBigNumber } from "@/lib/utils";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { TabsDataModel } from "@/models/TabsModel";
 import { VaultInfo, vaultInfo } from "@/lib/constants";
-import AddVaultModal from "@/components/Modals/NoteCardModals/DepositModals/AddVault/AddVaultModal";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { vaultAbi } from "@/lib/abi/Vault";
-import { Tooltip } from "@nextui-org/react";
+import Vault from "@/components/NoteCard/vaults/Vault";
+import AddVault from "@/components/NoteCard/vaults/AddVault";
+import { getYields } from "@/utils/vaults";
+import { vaultTableHeaders } from "@/constants/vaults";
 
 interface DepositProps {
   tokenId: string;
@@ -34,6 +24,8 @@ const Deposit: React.FC<DepositProps> = ({
   total_collateral,
   collateralization_ratio,
 }) => {
+  const [assetYields, setAssetYields] = useState();
+
   const { data: vaultData } = useReadContracts({
     contracts: supportedVaults.map((address) => ({
       address: vaultManagerAddress[defaultChain.id],
@@ -88,56 +80,8 @@ const Deposit: React.FC<DepositProps> = ({
 
   const availableVaults = 6 - emptyVaultMap.filter((data) => !data).length;
 
-  const vaultTableHeaders = [
-    {
-      label: "Currency",
-      columnKey: "currency",
-    },
-    {
-      label: "Tokens deposited",
-      columnKey: "tokensDeposited",
-    },
-    {
-      label: "Total value (USD)",
-      columnKey: "totalValueUsd",
-    },
-    {
-      label: "Asset yield",
-      columnKey: "assetYield",
-    },
-    {
-      label: "",
-      columnKey: "actionOptions",
-    },
-  ];
-
-  const [assetYields, setAssetYields] = useState();
-
-  const getYields = async () => {
-    const yields = await vaultInfo.map(async (vault) => {
-      let apr = undefined;
-      if (vault.getApr) {
-        try {
-          const aprValue = await vault.getApr();
-          if (aprValue) {
-            apr = `${aprValue.toFixed(2)}%`;
-          }
-        } catch {}
-      }
-
-      setAssetYields((prevState: any) => ({
-        ...prevState,
-        [vault.vaultAddress]: [apr, vault.additionalYield]
-          .filter((item) => item !== undefined)
-          .join(" + "),
-      }));
-    });
-
-    return yields;
-  };
-
   useEffect(() => {
-    getYields();
+    getYields(vaultInfo, setAssetYields);
   }, []);
 
   const renderVaultTable = (vaultData: VaultInfo[]) => {
@@ -201,240 +145,3 @@ const Deposit: React.FC<DepositProps> = ({
   );
 };
 export default Deposit;
-
-const Vault = ({
-  vault,
-  tokenId,
-  assetYield,
-  vaultAssets,
-}: {
-  vault: VaultInfo;
-  tokenId: string;
-  assetYield: string | undefined;
-  vaultAssets:
-    | Record<
-        string,
-        {
-          asset: string;
-          usdValue: string;
-        }
-      >
-    | undefined;
-}) => {
-  const [isEditVaultModalOpen, setIsVaultModalOpen] = useState<boolean>(false);
-  const [selectedEditVaultTab, setSelectedEditVaultTab] = useState<
-    "Deposit" | "Withdraw"
-  >("Deposit");
-  const { data: hasVault } = useReadVaultManagerHasVault({
-    chainId: defaultChain.id,
-    args: [BigInt(tokenId), vault.vaultAddress],
-  });
-  const { data: collateralValue, isLoading: collateralLoading } =
-    useReadContract({
-      address: vault.vaultAddress,
-      abi: wEthVaultAbi,
-      args: [BigInt(tokenId)],
-      functionName: "getUsdValue",
-      chainId: defaultChain.id,
-    });
-
-  const { data: collatRatio } = useReadVaultManagerCollatRatio({
-    args: [BigInt(tokenId)],
-    chainId: defaultChain.id,
-  });
-
-  const { tokenAddress: collateralAddress, symbol: collateralString } =
-    vaultInfo.filter((value) => value.vaultAddress === vault.vaultAddress)[0];
-
-  const tabs: TabsDataModel[] = [
-    {
-      label: "Deposit",
-      tabKey: "Deposit",
-      content: (
-        <EditVaultTabContent
-          action="deposit"
-          token={collateralAddress}
-          symbol={collateralString}
-          collateralizationRatio={collatRatio}
-          tokenId={tokenId}
-          vault={vault}
-        />
-      ),
-    },
-    {
-      label: "Withdraw",
-      tabKey: "Withdraw",
-      content: (
-        <EditVaultTabContent
-          action="withdraw"
-          token={collateralAddress}
-          symbol={collateralString}
-          collateralizationRatio={collatRatio}
-          tokenId={tokenId}
-          vault={vault}
-        />
-      ),
-    },
-  ];
-
-  if (!hasVault) {
-    return null;
-  }
-  if (collateralLoading) {
-    return (
-      <Skeleton className="rounded-md md:rounded-none w-full md:w-[100px] h-9 md:h-[100px]" />
-    );
-  }
-
-  const renderActionButton = () => (
-    <Dialog
-      open={isEditVaultModalOpen}
-      onOpenChange={() =>
-        setIsVaultModalOpen((prevState: boolean) => !prevState)
-      }
-    >
-      <DialogContent className="max-w-[90vw] md:max-w-lg px-[0px] md:px-8 pt-8 ml-auto">
-        <EditVaultModal
-          tabsData={tabs}
-          logo={collateralString}
-          selectedTab={selectedEditVaultTab}
-        />
-      </DialogContent>
-    </Dialog>
-  );
-
-  return (
-    <div
-      className="bg-[#282828] rounded rounded-lg p-2"
-      key={vault.tokenAddress}
-    >
-      {renderActionButton()}
-      <div className="md:hidden justify-between mb-4 flex">
-        <div className=" my-auto flex">
-          <div className="text-xs text-[#A1A1AA] my-auto">
-            <Image
-              src={vault.icon}
-              width={20}
-              height={20}
-              alt={`${vault.symbol} icon`}
-            />
-          </div>
-          <div className="text-md ml-2 flex font-bold">{vault.symbol}</div>
-        </div>
-        <div className="my-auto">
-          <div className="flex justify-between text-xs">
-            <div
-              className="cursor-pointer mr-2 h-6 w-6 rounded-[50%] bg-[#1A1A1A] flex"
-              onClick={() => {
-                setIsVaultModalOpen(true);
-                setSelectedEditVaultTab("Withdraw");
-              }}
-            >
-              <div className="m-auto">-</div>
-            </div>
-            <div
-              className="cursor-pointer ml-auto h-6 w-6 rounded-[50%] bg-[#1A1A1A] flex"
-              onClick={() => {
-                setIsVaultModalOpen(true);
-                setSelectedEditVaultTab("Deposit");
-              }}
-            >
-              <div className="m-auto">+</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="justify-between text-xs text-[#A1A1AA] tracking-wider flex md:hidden">
-        <div className="block w-full text-xs ">
-          <div className="mb-2 flex justify-between">
-            <div>Tokens deposited</div>
-            <div className="flex text-white">
-              <div>{vaultAssets?.[vault.vaultAddress]?.asset}</div>
-            </div>
-          </div>
-          <div className="mb-2 flex justify-between">
-            <div>Total value (USD)</div>
-            <div className="text-white">
-              <span>{vaultAssets?.[vault.vaultAddress]?.usdValue}</span>
-            </div>
-          </div>
-          <div className="mb-2 flex justify-between">
-            <div>Asset yield</div>
-            <div className="text-white w-1/2 text-right">
-              <span>{assetYield}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="hidden justify-between text-xs tracking-wider md:grid md:grid-cols-9 md:gap-x-2 text-center items-center h-9">
-        <div className="col-span-2 flex pl-2 items-center">
-          <div>
-            <Image
-              src={vault.icon}
-              width={20}
-              height={20}
-              alt={`${vault.symbol} icon`}
-            />
-          </div>
-          <div className="ml-2">{vault.symbol}</div>
-        </div>
-        <div className="col-span-2 flex justify-center">
-          <div>{vaultAssets?.[vault.vaultAddress]?.asset}</div>
-        </div>
-        <div className="col-span-2 ">
-          ${vaultAssets?.[vault.vaultAddress]?.usdValue}
-        </div>
-        <div className="col-span-2 ">{assetYield}</div>
-        <div className="col-span-1 ">
-          <div className="flex justify-between">
-            <Tooltip content="Withdraw" closeDelay={200}>
-              <div
-                className="cursor-pointer ml-auto h-6 w-6 rounded-[50%] bg-[#1A1A1A] flex hover:scale-110 transition-[scale]"
-                onClick={() => {
-                  setIsVaultModalOpen(true);
-                  setSelectedEditVaultTab("Withdraw");
-                }}
-              >
-                <div className="m-auto">-</div>
-              </div>
-            </Tooltip>
-            <Tooltip content="Deposit" closeDelay={200}>
-              <div
-                className="cursor-pointer ml-auto h-6 w-6 rounded-[50%] bg-[#1A1A1A] flex hover:scale-110 transition-[scale]"
-                onClick={() => {
-                  setIsVaultModalOpen(true);
-                  setSelectedEditVaultTab("Deposit");
-                }}
-              >
-                <div className="m-auto">+</div>
-              </div>
-            </Tooltip>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const AddVault = ({
-  tokenId,
-  vaultAddresses,
-}: {
-  tokenId: string;
-  vaultAddresses: Address[];
-}) => {
-  return (
-    <Dialog>
-      <DialogTrigger className="h-full w-full mt-2">
-        <div
-          className={`font-semibold text-[#FAFAFA] text-sm items-center justify-center flex flex-col rounded-md gap-2 w-full h-9 bg-transparent border border-white/30`}
-        >
-          <p>+</p>
-        </div>
-      </DialogTrigger>
-      <DialogContent className="max-w-[90vw] md:max-w-fit">
-        <AddVaultModal vaults={vaultAddresses} tokenId={tokenId} />
-      </DialogContent>
-    </Dialog>
-  );
-};
