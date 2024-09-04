@@ -261,7 +261,15 @@ const NoteDetails: React.FC<NoteDetailsProps> = ({selectedRow}) => {
       {selectedRow && (
         <>
           <h2>Note ID: {selectedRow.id}</h2> {/* Added title for note ID */}
-          {renderActiveTabContent(activeTab)}
+          {hasVault ? (
+            <NoteNumber
+              data={noteData}
+              dyad={[fromBigNumber(mintableDyad), fromBigNumber(mintedDyad)]}
+              collateral={vaultAmounts}
+            />
+          ) : (
+            <p>Deposit collateral to open vault</p>
+          )}
         </>
       )}
     </DialogContent>
