@@ -146,8 +146,6 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
       contractData?.minCollateralizationRatio
     );
 
-    console.log(totalCollateral, totalDyad, minCollateralRatio, price);
-
     const maxWithdraw =
       (totalCollateral - totalDyad * minCollateralRatio) / price;
 
