@@ -7,6 +7,7 @@ import {
   wEthVaultAbi,
   dyadAbi,
   dyadAddress,
+  dNftAddress,
 } from "@/generated";
 import {defaultChain} from "@/lib/config";
 import NoteNumber from "../NoteCard/Children/NoteNumber";
@@ -27,6 +28,7 @@ import {
 } from "@nextui-org/react";
 import {Menu} from "lucide-react";
 import {DialogContent} from "@/components/ui/dialog";
+import { dnftAbi } from "@/lib/abi/Dnft";
 
 interface NoteDetailsProps {
   selectedRow: any; // Adjust the type as necessary
@@ -71,6 +73,12 @@ const NoteDetails: React.FC<NoteDetailsProps> = ({selectedRow}) => {
         functionName: "mintedDyad",
         args: [BigInt(selectedRow.id)],
       },
+      {
+        address: dNftAddress[defaultChain.id],
+        abi: dnftAbi,
+        functionName: "ownerOf",
+        args: [BigInt(selectedRow.id)],
+      },
     ],
     allowFailure: false,
     query: {
@@ -80,6 +88,7 @@ const NoteDetails: React.FC<NoteDetailsProps> = ({selectedRow}) => {
         const keroCollateralValue = data[1][1];
         const minCollatRatio = data[2];
         const mintedDyad = data[3];
+        const ownerOf = data[4];
         const totalCollateralValue = exoCollateralValue + keroCollateralValue;
 
         return {
@@ -89,6 +98,7 @@ const NoteDetails: React.FC<NoteDetailsProps> = ({selectedRow}) => {
           totalCollateralValue,
           minCollatRatio,
           mintedDyad,
+          ownerOf,
         };
       },
     },
@@ -260,7 +270,25 @@ const NoteDetails: React.FC<NoteDetailsProps> = ({selectedRow}) => {
     <DialogContent>
       {selectedRow && (
         <>
-          <h2>Note ID: {selectedRow.id}</h2> {/* Added title for note ID */}
+          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+            <h2 style={{ margin: 0 }}>Note ID: {selectedRow.id}</h2> {/* Note ID */}
+            <span style={{ margin: '0 10px' }}>|</span> {/* Separator */}
+            <p style={{ margin: 0 }}>
+              Owner:{" "}
+              <a 
+                href={`https://etherscan.io/address/${contractData.ownerOf}`} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                style={{ color: 'white', textDecoration: 'underline' }} // Styled link
+                onMouseOver={(e) => e.currentTarget.style.textDecoration = 'none'} // Hover effect
+                onMouseOut={(e) => e.currentTarget.style.textDecoration = 'underline'} // Reset hover effect
+              >
+                {contractData.ownerOf 
+                  ? `${contractData.ownerOf.toString().slice(0, 5)}...${contractData.ownerOf.toString().slice(-3)}`
+                  : "N/A"}
+              </a>
+            </p> {/* Owner with link */}
+          </div> {/* Flex container for better layout */}
           {hasVault ? (
             <NoteNumber
               data={noteData}
