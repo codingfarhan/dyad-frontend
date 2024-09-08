@@ -182,7 +182,7 @@ const Vault = ({
         <div className="my-auto">
           <div className="flex justify-between text-xs">
             <div
-              className="cursor-pointer mr-2 h-6 w-6 rounded-[50%] bg-[#f67d2e] flex text-[#1A1A1A]"
+              className="cursor-pointer mr-2 h-6 w-6 rounded-[50%] bg-[#1A1A1A] flex"
               onClick={() => {
                 openEditModal("Withdraw");
                 setIsEditInDialog(true);
@@ -193,7 +193,7 @@ const Vault = ({
               </div>
             </div>
             <div
-              className="cursor-pointer ml-auto h-6 w-6 rounded-[50%] flex  bg-[#007500] text-[#1A1A1A]"
+              className="cursor-pointer ml-auto h-6 w-6 rounded-[50%] flex bg-[#1A1A1A]"
               onClick={() => {
                 openEditModal("Deposit");
                 setIsEditInDialog(true);
@@ -268,14 +268,7 @@ const Vault = ({
                     closeDelay={200}
                   >
                     <div
-                      className={`cursor-pointer ml-auto h-6 w-6 rounded-[50%] text-[#1A1A1A] flex pointer-events-auto ${
-                        selectedKeys?.values().next().value ===
-                        vault.vaultAddress
-                          ? selectedEditVaultTab === "Deposit"
-                            ? "bg-[#f67d2e] font-bold"
-                            : "bg-[#007500] font-bold"
-                          : "bg-[#f67d2e] font-bold"
-                      }`}
+                      className="cursor-pointer ml-auto h-6 w-6 rounded-[50%] bg-[#1A1A1A] flex pointer-events-auto font-bold"
                       onClick={() => {
                         selectedKeys?.values().next().value ===
                         `${vault.vaultAddress}`
@@ -311,12 +304,7 @@ const Vault = ({
                     closeDelay={200}
                   >
                     <div
-                      className={`cursor-pointer ml-auto h-6 w-6 rounded-[50%] text-[#1A1A1A] flex pointer-events-auto ${
-                        selectedKeys?.values().next().value ===
-                        vault.vaultAddress
-                          ? "bg-[#8B0000] text-[#e2e8f0]"
-                          : "bg-[#007500] font-bold"
-                      }`}
+                      className="cursor-pointer ml-auto h-6 w-6 rounded-[50%] bg-[#1A1A1A] flex pointer-events-auto"
                       onClick={() => {
                         if (
                           selectedKeys?.values().next().value ===
