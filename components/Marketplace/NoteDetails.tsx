@@ -273,22 +273,24 @@ const NoteDetails: React.FC<NoteDetailsProps> = ({selectedRow}) => {
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
             <h2 style={{ margin: 0 }}>Note ID: {selectedRow.id}</h2> {/* Note ID */}
             <span style={{ margin: '0 10px' }}>|</span> {/* Separator */}
-            <p style={{ margin: 0 }}>
-              Owner:{" "}
-              <a 
-                href={`https://etherscan.io/address/${contractData.ownerOf}`} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                style={{ color: 'white', textDecoration: 'underline' }} // Styled link
-                onMouseOver={(e) => e.currentTarget.style.textDecoration = 'none'} // Hover effect
-                onMouseOut={(e) => e.currentTarget.style.textDecoration = 'underline'} // Reset hover effect
-              >
-                {contractData.ownerOf 
-                  ? `${contractData.ownerOf.toString().slice(0, 5)}...${contractData.ownerOf.toString().slice(-3)}`
-                  : "N/A"}
-              </a>
-            </p> {/* Owner with link */}
-          </div> {/* Flex container for better layout */}
+            {contractData && (
+              <p style={{ margin: 0 }}>
+                Owner:{" "}
+                <a 
+                  href={`https://etherscan.io/address/${contractData.ownerOf}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  style={{ color: 'white', textDecoration: 'underline' }} // Styled link
+                  onMouseOver={(e) => e.currentTarget.style.textDecoration = 'none'} // Hover effect
+                  onMouseOut={(e) => e.currentTarget.style.textDecoration = 'underline'} // Reset hover effect
+                >
+                  {contractData.ownerOf 
+                    ? `${contractData.ownerOf.toString().slice(0, 5)}...${contractData.ownerOf.toString().slice(-3)}`
+                    : "N/A"}
+                </a>
+              </p> 
+            )}
+          </div> 
           {hasVault ? (
             <NoteNumber
               data={noteData}
