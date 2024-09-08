@@ -25,6 +25,7 @@ const Deposit: React.FC<DepositProps> = ({
   collateralization_ratio,
 }) => {
   const [assetYields, setAssetYields] = useState();
+  const [selectedKeys, setSelectedKeys] = useState<any>();
 
   const { data: vaultData } = useReadContracts({
     contracts: supportedVaults.map((address) => ({
@@ -108,6 +109,8 @@ const Deposit: React.FC<DepositProps> = ({
                   vault={vault}
                   assetYield={assetYields && assetYields[vault.vaultAddress]}
                   vaultAssets={vaultAssets}
+                  selectedKeys={selectedKeys}
+                  setSelectedKeys={setSelectedKeys}
                 />
               );
             })}
