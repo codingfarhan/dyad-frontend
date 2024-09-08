@@ -2,7 +2,26 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ## Getting Started
 
-First, run the development server:
+First, create a new .env file and add the following environment variables inside the file:
+
+```bash
+NEXT_PUBLIC_WALLETCONNECT_ID=
+NEXT_PUBLIC_RESERVOIR_API_KEY=
+NEXT_PUBLIC_ALCHEMY_API_KEY=
+NEXT_PUBLIC_SUBGRAPH_URL=
+```
+
+Next, install all the packages:
+
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+```
+
+Now run the development server:
 
 ```bash
 npm run dev
