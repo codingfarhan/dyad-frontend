@@ -1,8 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import ButtonComponent from "@/components/reusable/ButtonComponent";
-import { DialogClose } from "@/components/ui/dialog";
 import { BigIntInput } from "@/components/reusable/BigIntInput";
 import { formatNumber, fromBigNumber, toBigNumber } from "@/lib/utils";
 import { Address, erc20Abi, maxUint256 } from "viem";
@@ -21,6 +20,7 @@ import {
 import { defaultChain } from "@/lib/config";
 import { vaultAbi } from "@/lib/abi/Vault";
 import { VaultInfo } from "@/lib/constants";
+import { DialogClose } from "@radix-ui/react-dialog";
 
 interface EditVaultTabContentProps {
   action: "deposit" | "withdraw" | "redeem";
@@ -29,6 +29,10 @@ interface EditVaultTabContentProps {
   symbol: string;
   collateralizationRatio: bigint | undefined;
   tokenId: string;
+  isInDialog: boolean;
+  accordionClose: () => void;
+  inputValue: string;
+  setInputValue: (e: string) => void;
 }
 
 const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
@@ -38,8 +42,11 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
   collateralizationRatio,
   tokenId,
   vault,
+  isInDialog,
+  accordionClose,
+  inputValue,
+  setInputValue,
 }) => {
-  const [inputValue, setInputValue] = useState("");
   const { address } = useAccount();
   const { setTransactionData } = useTransactionStore();
 
@@ -103,7 +110,7 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
         abi: vaultAbi,
         functionName: "id2asset",
         args: [BigInt(tokenId)],
-      }
+      },
     ],
     query: {
       select: (data) => ({
@@ -122,7 +129,8 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
   const newCr =
     ((fromBigNumber(contractData?.collateralValue) +
       (action === "deposit"
-        ? fromBigNumber(inputValue) * fromBigNumber(contractData?.assetValue, vault.decimals)
+        ? fromBigNumber(inputValue) *
+          fromBigNumber(contractData?.assetValue, vault.decimals)
         : -fromBigNumber(inputValue) *
           fromBigNumber(contractData?.assetValue, vault.decimals))) /
       fromBigNumber(contractData?.mintedDyad)) *
@@ -163,14 +171,16 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div
+      className={`flex flex-col gap-4 pointer-events-auto  ${!isInDialog && "p-4 mb-1 border-t-[1px] border-[#3C3C3C]"}`}
+    >
       <div className="block md:flex justify-between gap-5 w-full mt-2 md:mt-0">
         <div className="w-full md:w-5/6 ">
           <BigIntInput
             value={inputValue}
             onChange={(value) => setInputValue(value)}
             placeholder={`Amount of ${action === "redeem" ? "DYAD" : symbol} to ${action}...`}
-            className="h-[45px] md:h-[39px] rounded-md md:rounded-r-none"
+            className="h-[45px] md:h-[39px] rounded-md md:rounded-r-none border-[1px] border-[#434343]"
           />
         </div>
         <div className="w-full md:w-[74px]">
@@ -212,9 +222,13 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
               <div className="flex justify-between gap-2 text-[#A1A1AA]">
                 <div>Accrual Rate: </div>
                 <div>
-                  {((0.000000001 * fromBigNumber(contractData?.keroDeposited ?? 0n)) * 60 * 60 * 24).toFixed(
-                    2
-                  )}{" "}
+                  {(
+                    0.000000001 *
+                    fromBigNumber(contractData?.keroDeposited ?? 0n) *
+                    60 *
+                    60 *
+                    24
+                  ).toFixed(2)}{" "}
                   / day
                 </div>
               </div>
@@ -237,8 +251,11 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
         {contractData?.allowance !== undefined &&
         contractData?.allowance < toBigNumber(inputValue, 0) &&
         action === "deposit" ? (
-          <div className="w-[100px]">
+          <div className="w-full md:w-[50%] mr-2 md:mr-0">
             <ButtonComponent
+              style={{
+                background: !isInDialog ? "#1A1A1A" : "",
+              }}
               onClick={() =>
                 setTransactionData({
                   config: {
@@ -255,34 +272,46 @@ const EditVaultTabContent: React.FC<EditVaultTabContentProps> = ({
             </ButtonComponent>
           </div>
         ) : (
-          <DialogClose className="w-full mr-2 md:mr-0">
-            <ButtonComponent
-              onClick={() => {
-                setTransactionData({
-                  config: {
-                    address: vaultManagerAddress[defaultChain.id],
-                    abi: vaultManagerAbi,
-                    functionName: action === "redeem" ? "redeemDyad" : action,
-                    args:
-                      action === "deposit"
-                        ? [tokenId, vault.vaultAddress, inputValue]
-                        : [tokenId, vault.vaultAddress, inputValue, address],
-                  },
-                  description: `${action} ${formatNumber(fromBigNumber(inputValue), 4)} ${action === "redeem" ? "DYAD" : symbol}`,
-                });
-                setInputValue("");
-              }}
-              disabled={!inputValue}
-              variant="solid"
-            >
-              <p className="capitalize">{action}</p>
-            </ButtonComponent>
-          </DialogClose>
+          <ButtonComponent
+            style={{
+              background: !isInDialog ? "#1A1A1A" : "",
+            }}
+            className="w-full md:w-[50%] mr-2 md:mr-0"
+            onClick={() => {
+              setTransactionData({
+                config: {
+                  address: vaultManagerAddress[defaultChain.id],
+                  abi: vaultManagerAbi,
+                  functionName: action === "redeem" ? "redeemDyad" : action,
+                  args:
+                    action === "deposit"
+                      ? [tokenId, vault.vaultAddress, inputValue]
+                      : [tokenId, vault.vaultAddress, inputValue, address],
+                },
+                description: `${action} ${formatNumber(fromBigNumber(inputValue), 4)} ${action === "redeem" ? "DYAD" : symbol}`,
+              });
+              setInputValue("");
+            }}
+            disabled={!inputValue}
+            variant="solid"
+          >
+            <p className="capitalize">{action}</p>
+          </ButtonComponent>
         )}
 
-        <DialogClose className="w-full ml-2 md:ml-0">
-          <ButtonComponent variant="bordered">Cancel</ButtonComponent>
-        </DialogClose>
+        {isInDialog ? (
+          <DialogClose className="w-full md:w-[50%] ml-2 md:ml-0">
+            <ButtonComponent variant="bordered">Cancel</ButtonComponent>
+          </DialogClose>
+        ) : (
+          <ButtonComponent
+            className="w-full md:w-[50%] ml-2 md:ml-0"
+            variant="bordered"
+            onClick={accordionClose}
+          >
+            Cancel
+          </ButtonComponent>
+        )}
       </div>
     </div>
   );
