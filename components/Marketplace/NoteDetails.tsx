@@ -251,15 +251,15 @@ const NoteDetails: React.FC<NoteDetailsProps> = ({ selectedRow }) => {
           <div
             style={{
               display: "flex",
+              justifyContent: "space-between", // Updated to space between
               alignItems: "center",
               marginBottom: "10px",
             }}
           >
-            <h2 style={{ margin: 0 }}>Note ID: {selectedRow.id}</h2>{" "}
-            {/* Note ID */}
-            <span style={{ margin: "0 10px" }}>|</span> {/* Separator */}
+            <h2 style={{ margin: 0, fontSize: "24px", fontWeight: "bold" }}>Note Nº {selectedRow.id}</h2>{" "}
+            {/* Note ID - Made bigger and bold */}
             {contractData && (
-              <p style={{ margin: 0 }}>
+              <p style={{ margin: 0, marginRight: "20px" }}> {/* Added margin-right */}
                 Owner:{" "}
                 <a
                   href={`https://etherscan.io/address/${contractData.ownerOf}`}
