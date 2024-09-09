@@ -43,7 +43,7 @@ const NoteNumber: React.FC<NoteNumberProps> = ({ data, dyad, collateral }) => {
                   item.highlighted ? "text-[#FAFAFA]" : "text-[#A1A1AA]"
                 }`}
               >
-                <div>{item.text}</div>
+                <div className="text-white">{item.text}</div>
                 <div className="text-right">{item.value}</div>
               </div>
             ))}
