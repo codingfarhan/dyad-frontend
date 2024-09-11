@@ -1,6 +1,7 @@
 {
     "name": "DYAD Stablecoin",
     "short_name": "DYAD",
+    "description": "DYAD Stablecoin Protocol",
     "icons": [
         {
             "src": "android-chrome-192x192.png",
