@@ -32,7 +32,7 @@ export default function RootLayout({
             <div className="flex relative max-w-screen-md w-full md:w-[745px] justify-start box-border md:pb-8 pb-12 pt-8">
               <MainNav className="mx-4 flex-1 max-w-screen-md" />
               <div className="ml-auto flex items-center space-x-4 mr-4">
-                <ConnectButton showBalance={false}  />
+                <ConnectButton showBalance={false}   />
               </div>
             </div>
             {children}
