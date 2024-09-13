@@ -24,33 +24,30 @@ const NoteNumber: React.FC<NoteNumberProps> = ({ data, dyad, collateral }) => {
   ];
 
   return (
-    <div className="flex justify-between">
-      <div className="block justify-between w-full text-[#FAFAFA]">
-        <div className="w-full justify-center mt-[20px]">
-          <div className="w-full m-auto">
-            <PieChartComponent
-              outsideData={dyadData}
-              insideData={collateral}
-            />
-          </div>
-        </div>
-        <div className="w-100 md:w-auto mt-6 md:mt-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16">
-            {data.map((item: any, index: number) => (
-              <div
-                key={index}
-                className={`flex w-auto justify-between mb-2 md:mb-[25px] text-sm ${
-                  item.highlighted ? "text-[#FAFAFA]" : "text-[#A1A1AA]"
-                }`}
-              >
-                <div>{item.text}</div>
-                <div className="text-right">{item.value}</div>
-              </div>
-            ))}
-          </div>
+    <div className="flex flex-col items-center w-full text-[#FAFAFA]">
+      <div className="w-full mt-6">
+        <PieChartComponent
+          outsideData={dyadData}
+          insideData={collateral}
+        />
+      </div>
+      <div className="w-full mt-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {data.map((item: any, index: number) => (
+            <div
+              key={index}
+              className={`flex justify-between p-4 rounded-lg shadow-md ${
+                item.highlighted ? "bg-[#1A1A1A]" : "bg-[#282828]"
+              }`}
+            >
+              <div className="text-sm font-medium">{item.text}</div>
+              <div className="text-sm text-right">{item.value}</div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
   );
 };
+
 export default NoteNumber;

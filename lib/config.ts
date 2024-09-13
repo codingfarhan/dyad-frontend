@@ -1,19 +1,14 @@
 import { mainnet } from "viem/chains";
-import { defaultWagmiConfig } from "@web3modal/wagmi";
-import { fallback, http } from "viem";
-
+import { connectorsForWallets } from "@rainbow-me/rainbowkit";
+import { walletConnectWallet, coinbaseWallet, injectedWallet, safeWallet, metaMaskWallet, rabbyWallet } from "@rainbow-me/rainbowkit/wallets";
+import { getDefaultWallets } from "@rainbow-me/rainbowkit";
+import { createConfig, fallback, http } from "wagmi";
 export const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_ID;
 export const defaultChain = mainnet;
 
 if (!projectId) throw new Error("Project ID is not defined");
 
-const metadata = {
-  name: "Dyad",
-  description: "Dyad Stablecoin",
-  url: "https://dyadstable.xyz",
-  icons: ["https://dyadstable.xyz/favicon-32x32.png"],
-};
-
+const chains = [defaultChain] as const;
 
 let defaultTransport;
 if (process.env.NEXT_PUBLIC_RPC_URL) {
@@ -28,12 +23,37 @@ else {
   defaultTransport = http();
 }
 
-const chains = [defaultChain] as const;
-export const wagmiConfig = defaultWagmiConfig({
+const wallets = getDefaultWallets({
+  appName: "DYAD",
+  projectId: projectId,
+  appDescription: "DYAD Stablecoin",
+  appUrl: "https://app.dyadstable.xyz",
+  appIcon: "https://app.dyadstable.xyz/favicon-32x32.png",
+});
+
+wallets.wallets.unshift({
+  groupName: "Recommended",
+  wallets: [
+    metaMaskWallet,
+    rabbyWallet,
+    coinbaseWallet,
+    walletConnectWallet,
+    safeWallet,
+  ],
+})
+
+const connectors = connectorsForWallets(wallets.wallets, {
+  projectId: projectId,
+  appName: "DYAD",
+  appDescription: "DYAD Stablecoin",
+  appUrl: "https://app.dyadstable.xyz",
+  appIcon: "https://app.dyadstable.xyz/favicon-32x32.png",
+})
+
+export const wagmiConfig = createConfig({
+  connectors: connectors,
   chains,
-  projectId,
-  metadata,
   transports: {
-    [mainnet.id]: defaultTransport
-  },
+    [defaultChain.id]: defaultTransport,
+  }
 });

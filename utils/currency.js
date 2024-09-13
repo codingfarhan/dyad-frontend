@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import { parseEther as viemParseEther } from "viem";
 
 export function formatUSD(amount, removeDollarSign = false) {
   // format with commas
@@ -36,10 +36,10 @@ export function normalize(value, decimals = 18) {
   return 0;
 }
 
-// thin wrapper around `ethers.utils.parseEther`
+// thin wrapper around `parseEther`
 export function parseEther(eth) {
   try {
-    return ethers.utils.parseEther(eth ? String(parseFloat(eth)) : "0");
+    return viemParseEther(eth ? String(parseFloat(eth)) : "0");
   } catch (e) {
     return 0;
   }

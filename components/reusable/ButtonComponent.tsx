@@ -20,12 +20,14 @@ const ButtonComponent: React.FC<ButtonComponentProps> = ({
   onClick = () => {},
   disabled = false,
   className = "",
+  style = {},
 }) => {
   return (
     <button
       className={`${classNames[variant]} ${MAIN_BUTTON_STYLES} ${disabled ? "opacity-50 cursor-not-allowed" : ""} ${className}`}
       onClick={onClick}
       disabled={disabled}
+      style={style}
     >
       {children}
     </button>

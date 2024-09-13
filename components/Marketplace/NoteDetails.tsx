@@ -1,4 +1,4 @@
-import React, {Fragment, useMemo, useState} from "react";
+import React, { Fragment, useMemo, useState } from "react";
 import NoteCardsContainer from "../reusable/NoteCardsContainer";
 import TabsComponent from "../reusable/TabsComponent";
 import {
@@ -7,26 +7,20 @@ import {
   wEthVaultAbi,
   dyadAbi,
   dyadAddress,
+  dNftAddress,
 } from "@/generated";
-import {defaultChain} from "@/lib/config";
+import { defaultChain } from "@/lib/config";
 import NoteNumber from "../NoteCard/Children/NoteNumber";
-import {NoteNumberDataColumnModel} from "@/models/NoteCardModels";
-import {TabsDataModel} from "@/models/TabsModel";
-import Deposit, {supportedVaults} from "../NoteCard/Children/Deposit";
+import { NoteNumberDataColumnModel } from "@/models/NoteCardModels";
+import { supportedVaults } from "../NoteCard/Children/Deposit";
 // import Mint from "./Children/Mint";
-import {useReadContracts} from "wagmi";
-import {maxUint256} from "viem";
-import {formatNumber, fromBigNumber} from "@/lib/utils";
-import {vaultInfo} from "@/lib/constants";
-import {Data} from "../reusable/PieChartComponent";
-import {
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
-} from "@nextui-org/react";
-import {Menu} from "lucide-react";
-import {DialogContent} from "@/components/ui/dialog";
+import { useReadContracts } from "wagmi";
+import { maxUint256 } from "viem";
+import { formatNumber, fromBigNumber } from "@/lib/utils";
+import { vaultInfo } from "@/lib/constants";
+import { Data } from "../reusable/PieChartComponent";
+import { DialogContent } from "@/components/ui/dialog";
+import { dnftAbi } from "@/lib/abi/Dnft";
 
 interface NoteDetailsProps {
   selectedRow: any; // Adjust the type as necessary
@@ -41,7 +35,7 @@ type ContractData = {
   mintedDyad?: bigint;
 };
 
-const NoteDetails: React.FC<NoteDetailsProps> = ({selectedRow}) => {
+const NoteDetails: React.FC<NoteDetailsProps> = ({ selectedRow }) => {
   const {
     data: contractData,
     isSuccess: dataLoaded,
@@ -71,6 +65,12 @@ const NoteDetails: React.FC<NoteDetailsProps> = ({selectedRow}) => {
         functionName: "mintedDyad",
         args: [BigInt(selectedRow.id)],
       },
+      {
+        address: dNftAddress[defaultChain.id],
+        abi: dnftAbi,
+        functionName: "ownerOf",
+        args: [BigInt(selectedRow.id)],
+      },
     ],
     allowFailure: false,
     query: {
@@ -80,6 +80,7 @@ const NoteDetails: React.FC<NoteDetailsProps> = ({selectedRow}) => {
         const keroCollateralValue = data[1][1];
         const minCollatRatio = data[2];
         const mintedDyad = data[3];
+        const ownerOf = data[4];
         const totalCollateralValue = exoCollateralValue + keroCollateralValue;
 
         return {
@@ -89,6 +90,7 @@ const NoteDetails: React.FC<NoteDetailsProps> = ({selectedRow}) => {
           totalCollateralValue,
           minCollatRatio,
           mintedDyad,
+          ownerOf,
         };
       },
     },
@@ -109,7 +111,7 @@ const NoteDetails: React.FC<NoteDetailsProps> = ({selectedRow}) => {
     }
   }, [contractData]);
 
-  const {data: usdCollateral, isError: vaultCollateralError} =
+  const { data: usdCollateral, isError: vaultCollateralError } =
     useReadContracts({
       contracts: supportedVaults.map((address) => ({
         address: address,
@@ -121,7 +123,7 @@ const NoteDetails: React.FC<NoteDetailsProps> = ({selectedRow}) => {
       allowFailure: false,
     });
 
-  const {data: tokenCollateral, isError: tokenCollateralError} =
+  const { data: tokenCollateral, isError: tokenCollateralError } =
     useReadContracts({
       contracts: supportedVaults.map((address) => ({
         address: address,
@@ -165,7 +167,7 @@ const NoteDetails: React.FC<NoteDetailsProps> = ({selectedRow}) => {
     {
       text: "Collateralization ratio",
       value: collateralizationRatio,
-      highlighted: true,
+      highlighted: false,
     },
     {
       text: "DYAD minted",
@@ -184,10 +186,20 @@ const NoteDetails: React.FC<NoteDetailsProps> = ({selectedRow}) => {
         : `$${formatNumber(fromBigNumber(exoCollateralValue))}`,
       highlighted: false,
     },
+    {
+      text: "XP",
+      value: selectedRow.xp,
+      highlighted: false,
+    },
+    {
+      text: "% of XP",
+      value: selectedRow.xpPercentage,
+      highlighted: false,
+    },
   ];
 
   // Check if the vault exists
-  const {data: hasVaultData, isError: hasVaultError} = useReadContracts({
+  const { data: hasVaultData, isError: hasVaultError } = useReadContracts({
     contracts: supportedVaults.map((address) => ({
       address: vaultManagerAddress[defaultChain.id],
       abi: vaultManagerAbi,
@@ -232,35 +244,42 @@ const NoteDetails: React.FC<NoteDetailsProps> = ({selectedRow}) => {
     keroCollateralValue,
   ]);
 
-  // Prepare tabs data
-  const tabData: TabsDataModel[] = [
-    {
-      label: `Note Nº ${selectedRow.id}`,
-      tabKey: `Note Nº ${selectedRow.id}`,
-      content: hasVault ? (
-        <NoteNumber
-          data={noteData}
-          dyad={[fromBigNumber(mintableDyad), fromBigNumber(mintedDyad)]}
-          collateral={vaultAmounts}
-        />
-      ) : (
-        <p>Deposit collateral to open vault</p>
-      ),
-    },
-  ];
-
-  const [activeTab, setActiveTab] = useState(tabData[0].tabKey);
-
-  const renderActiveTabContent = (activeTabKey: string) => {
-    return tabData.find((tab: TabsDataModel) => activeTab === tab.tabKey)
-      ?.content;
-  };
-
   return (
     <DialogContent>
       {selectedRow && (
         <>
-          <h2>Note ID: {selectedRow.id}</h2> {/* Added title for note ID */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between", // Updated to space between
+              alignItems: "center",
+              marginBottom: "10px",
+            }}
+          >
+            <h2 style={{ margin: 0, fontSize: "24px", fontWeight: "bold" }}>Note Nº {selectedRow.id}</h2>{" "}
+            {/* Note ID - Made bigger and bold */}
+            {contractData && (
+              <p style={{ margin: 0, marginRight: "20px" }}> {/* Added margin-right */}
+                Owner:{" "}
+                <a
+                  href={`https://etherscan.io/address/${contractData.ownerOf}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "white", textDecoration: "underline" }} // Styled link
+                  onMouseOver={(e) =>
+                    (e.currentTarget.style.textDecoration = "none")
+                  } // Hover effect
+                  onMouseOut={(e) =>
+                    (e.currentTarget.style.textDecoration = "underline")
+                  } // Reset hover effect
+                >
+                  {contractData.ownerOf
+                    ? `${contractData.ownerOf.toString().slice(0, 5)}...${contractData.ownerOf.toString().slice(-3)}`
+                    : "N/A"}
+                </a>
+              </p>
+            )}
+          </div>
           {hasVault ? (
             <NoteNumber
               data={noteData}
