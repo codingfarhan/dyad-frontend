@@ -18,8 +18,8 @@ import {
   useListings,
 } from "@reservoir0x/reservoir-kit-ui";
 import { maxUint256 } from "viem";
-import { web3Modal } from "@/lib/web3Modal";
 import MarketplaceList from "./Marketplace/MarketplaceList";
+import { useConnectModal } from "@rainbow-me/rainbowkit";
 
 const NoteTable: React.FC<any> = ({}) => {
   const listModalOpenState = useState(false);
@@ -31,6 +31,8 @@ const NoteTable: React.FC<any> = ({}) => {
     string | undefined
   >(undefined);
   const [renderCount, setRenderCount] = useState(0);
+
+  const { openConnectModal, connectModalOpen } = useConnectModal();
 
   useEffect(() => {
     setRenderCount(prev => prev + 1);
@@ -235,8 +237,8 @@ const NoteTable: React.FC<any> = ({}) => {
         onPurchaseComplete={(data) => {
           mutateListings();
         }}
-        onConnectWallet={async () => {
-          await web3Modal.open();
+        onConnectWallet={() => {
+          openConnectModal?.();
           buyModalOpenState[1](false);
         }}
       />
