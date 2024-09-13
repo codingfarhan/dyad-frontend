@@ -1,6 +1,5 @@
 import { mainnet } from "viem/chains";
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
-
 export const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_ID;
 export const defaultChain = mainnet;
 
@@ -15,5 +14,5 @@ export const wagmiConfig = getDefaultConfig({
   appDescription: "DYAD Stablecoin",
   appUrl: "https://app.dyadstable.xyz",
   appIcon: "https://app.dyadstable.xyz/favicon-32x32.png",
-
 })
+
