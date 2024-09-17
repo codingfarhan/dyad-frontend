@@ -49,7 +49,7 @@ export default function Home() {
 
   const tabsData = [
     {
-      label: "Earn Kerosene",
+      label: "Earn Now!",
       tabKey: "earn-kerosene",
       content: <EarnKeroseneContent />,
     },
